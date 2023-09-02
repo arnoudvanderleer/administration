@@ -13,7 +13,7 @@ import models_api from './endpoints/models-api';
 
 declare module 'express-session' {
   export interface SessionData {
-    financial_period: FinancialPeriod | undefined;
+    financial_period: FinancialPeriod;
   }
 }
 
@@ -48,21 +48,22 @@ app.use(fileUpload());
 (async () => {
     const models = await connect_db;
 
-    app.use(async (req, res, next) => {
+    app.use(async (req, _, next) => {
         if (!req.session.financial_period) {
-            req.session.financial_period = await models.FinancialPeriod.findOne({
+            req.session.financial_period = (await models.FinancialPeriod.findOne({
+                raw: true,
                 order: [['start_date', 'DESC']]
-            }) as FinancialPeriod;
+            }) as FinancialPeriod);
         }
         next();
     });
 
-    app.use("/models", models_api);
-    app.use("/api", api);
-    app.use("/", frontend);
-})();
+    app.use("/models", await models_api);
+    app.use("/api", await api);
+    app.use("/", await frontend);
 
-let port = 8080;
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-});
+    let port = 8080;
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`)
+    });
+})();

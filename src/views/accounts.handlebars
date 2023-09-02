@@ -1,30 +1,48 @@
 {{#section 'title'}}Grootboekrekeningen{{/section}}
 
 <style>
-    table, input {
+    table,
+    input {
         width: 100%;
     }
+
     main {
         padding: 10px;
+        background-color: var(--main-bg-color);
     }
 </style>
 
 <table class="data">
     <thead>
-        <tr><th>Nummer</th><th>Naam</th><!--<th>Categorie</th>--></tr>
+        <tr>
+            <th>In dit boekjaar</th>
+            <th>Nummer</th>
+            <th>Naam</th>
+            <th>Beginwaarde</th>
+            <th>Budget</th>
+            <th></th><!--<th>Categorie</th>-->
+        </tr>
     </thead>
     <tbody></tbody>
-    <tfoot><tr>
-        <td><input type="number" class="number" /></td>
-        <td><input type="text" class="name" /></td>
-        <td><span class="material-symbols-outlined add clickable">add</span></td>
-    </tr></tfoot>
+    <tfoot>
+        <tr>
+            <td><input type="checkbox" checked disabled /></td>
+            <td><input type="number" class="number" /></td>
+            <td><input type="text" class="name" /></td>
+            <td><input type="text" class="start-amount" disabled value="0.00" /></td>
+            <td><input type="text" class="budget" value="0.00" /></td>
+            <td><span class="material-symbols-outlined add clickable">add</span></td>
+        </tr>
+    </tfoot>
 </table>
 
 <template class="data-row">
     <tr>
+        <td><input type="checkbox" class="enabled" disabled /></td>
         <td class="number"></td>
         <td class="name"></td>
+        <td class="start-amount"></td>
+        <td class="budget"></td>
         <td class="events">
             <span class="material-symbols-outlined edit clickable">edit</span>
             <span class="material-symbols-outlined delete clickable">delete</span>
@@ -34,12 +52,15 @@
 
 <template class="edit-row">
     <tr>
+        <td><input type="checkbox" class="enabled" /></td>
         <td><input type="number" class="number" /></td>
         <td><input type="text" class="name" /></td>
+        <td><input type="text" class="start-amount" disabled /></td>
+        <td><input type="text" class="budget" /></td>
         <td><span class="material-symbols-outlined save clickable">save</span></td>
     </tr>
 </template>
 
 {{#section 'scripts'}}
-    <script type="module" src="/js/accounts.js"></script>
+<script type="module" src="/js/accounts.js"></script>
 {{/section}}

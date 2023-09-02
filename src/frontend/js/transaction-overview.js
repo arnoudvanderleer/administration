@@ -1,7 +1,7 @@
 import Transaction from "./common/Transaction.js";
 
 (async () => {
-    let transactions = await $.getJSON("/models/transaction" + (id ? "/" + id : ""));
+    let transactions = await $.getJSON(id ? `/models/account/${id}/transaction` : "/models/transaction/");
 
     $(".content").append(transactions.map(t => {
         let transaction_object = new Transaction(t, false);

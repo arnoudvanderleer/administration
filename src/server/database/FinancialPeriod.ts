@@ -6,16 +6,16 @@ export default class FinancialPeriod extends Model {
     declare start_date: Date;
     declare end_date: Date;
 
-    declare getAccounts: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
-    declare countAccounts: HasManyCountAssociationsMixin;
-    declare hasAccount: HasManyHasAssociationMixin<AccountFinancialPeriod, number>;
-    declare hasAccounts: HasManyHasAssociationsMixin<AccountFinancialPeriod, number>;
-    declare setAccounts: HasManySetAssociationsMixin<AccountFinancialPeriod, number>;
-    declare addAccount: HasManyAddAssociationMixin<AccountFinancialPeriod, number>;
-    declare addAccounts: HasManyAddAssociationsMixin<AccountFinancialPeriod, number>;
-    declare removeAccount: HasManyRemoveAssociationMixin<AccountFinancialPeriod, number>;
-    declare removeAccounts: HasManyRemoveAssociationsMixin<AccountFinancialPeriod, number>;
-    declare createAccount: HasManyCreateAssociationMixin<AccountFinancialPeriod>;
+    declare getAccountFinancialPeriods: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
+    declare countAccountFinancialPeriods: HasManyCountAssociationsMixin;
+    declare hasAccountFinancialPeriod: HasManyHasAssociationMixin<AccountFinancialPeriod, number>;
+    declare hasAccountFinancialPeriods: HasManyHasAssociationsMixin<AccountFinancialPeriod, number>;
+    declare setAccountFinancialPeriods: HasManySetAssociationsMixin<AccountFinancialPeriod, number>;
+    declare addAccountFinancialPeriod: HasManyAddAssociationMixin<AccountFinancialPeriod, number>;
+    declare addAccountFinancialPeriods: HasManyAddAssociationsMixin<AccountFinancialPeriod, number>;
+    declare removeAccountFinancialPeriod: HasManyRemoveAssociationMixin<AccountFinancialPeriod, number>;
+    declare removeAccountFinancialPeriods: HasManyRemoveAssociationsMixin<AccountFinancialPeriod, number>;
+    declare createAccountFinancialPeriod: HasManyCreateAssociationMixin<AccountFinancialPeriod>;
 }
 
 export function init(sequelize: Sequelize) {

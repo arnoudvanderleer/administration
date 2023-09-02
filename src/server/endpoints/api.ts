@@ -6,13 +6,13 @@ import connect_db from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
-import { Sequelize, Transaction } from 'sequelize';
+import { Op, Sequelize, Transaction } from 'sequelize';
+import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
-export default router;
 const json_parser = bodyParser.json();
 
-(async () => {
+export default (async () => {
     const models = await connect_db;
 
     router.post("/upload-transactions", async (req, res) => {
@@ -39,9 +39,10 @@ const json_parser = bodyParser.json();
             lines = await parse_csv(file.data);
         }
 
-        let results = {
+        let results: { added: number, skipped: number, errors: string[] } = {
             added: 0,
             skipped: 0,
+            errors: [],
         };
         for (let line of lines) {
             let bank_transaction_id = `${line[1]} ${line[0]} ${line[15]}`;
@@ -53,8 +54,18 @@ const json_parser = bodyParser.json();
             }
 
             let date_string = line[0] as string;
+            let date = new Date(`${date_string.substring(6, 10)}-${date_string.substring(3, 5)}-${date_string.substring(0, 2)}`);
+
+            if (
+                date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
+                date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+            ) {
+                results.errors.push(`Kan de regel ${JSON.stringify(line)} niet toevoegen omdat ${date} buiten het boekjaar ligt`);
+                continue;
+            }
+
             let transaction = await models.Transaction.create({
-                date: `${date_string.substring(6, 10)}-${date_string.substring(3, 5)}-${date_string.substring(0, 2)}`,
+                date,
                 description: `${line[16]} ${line[17]}`.trim(),
             });
             let amount = parseFloat(line[10] as string);
@@ -78,7 +89,10 @@ const json_parser = bodyParser.json();
 
     router.get("/unprocessed-transactions/:id", async (req, res) => {
         res.send(await models.Transaction.findAll({
-            where: { complete: false },
+            where: {
+                complete: false,
+                date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
+            },
             order: [['date', 'ASC']],
             include: [
                 BankTransaction,
@@ -91,17 +105,30 @@ const json_parser = bodyParser.json();
         }));
     });
 
-    router.get("/account-overview", async (_, res) => {
+    // Check financial period from here.
+
+    router.get("/account-overview", async (req, res) => {
+        // let result = await models.Account.
         let result = await models.Account.findAll({
-            include: {
-                model: models.Mutation,
-                attributes: [],
-                include: [{
-                    model: models.Transaction,
+            include: [
+                {
+                    model: models.Mutation,
                     attributes: [],
-                    where: {complete: true},
-                }]
-            },
+                    include: [{
+                        model: models.Transaction,
+                        attributes: [],
+                        where: {
+                            complete: true,
+                            date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
+                        },
+                    }]
+                },
+                {
+                    model: models.AccountFinancialPeriod,
+                    where: { FinancialPeriodId: req.session.financial_period?.id },
+                    attributes: [],
+                }
+            ],
             attributes: {
                 include: [
                     [Sequelize.fn('SUM', Sequelize.col("Mutations.amount")), 'amount_sum']
@@ -114,12 +141,13 @@ const json_parser = bodyParser.json();
     });
 
     router.put("/financial-period", json_parser, async (req, res) => {
-        console.log(req.body);
         let period = await models.FinancialPeriod.findByPk(req.body.id);
         if (!period) return res.status(400).send();
         req.session.financial_period = period;
         res.send();
     });
+
+    return router;
 })();
 
 function parse_csv(data: Buffer): Promise<Object[][]> {

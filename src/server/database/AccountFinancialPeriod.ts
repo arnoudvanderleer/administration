@@ -4,7 +4,6 @@ import FinancialPeriod from "./FinancialPeriod";
 
 export default class AccountFinancialPeriod extends Model {
     declare id: number;
-    declare enabled: boolean;
     declare start_amount: number;
     declare budget: number;
 
@@ -25,7 +24,6 @@ export function init(sequelize: Sequelize) {
             autoIncrement: true,
             primaryKey: true,
         },
-        enabled: DataTypes.BOOLEAN,
         start_amount: {
             type: DataTypes.DECIMAL,
         },

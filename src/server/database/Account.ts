@@ -7,16 +7,16 @@ export default class Account extends Model {
     declare number: number; // The account number as shown to the user
     declare name: string;
 
-    declare getFinancialPeriods: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
-    declare countFinancialPeriods: HasManyCountAssociationsMixin;
-    declare hasFinancialPeriod: HasManyHasAssociationMixin<AccountFinancialPeriod, number>;
-    declare hasFinancialPeriods: HasManyHasAssociationsMixin<AccountFinancialPeriod, number>;
-    declare setFinancialPeriods: HasManySetAssociationsMixin<AccountFinancialPeriod, number>;
-    declare addFinancialPeriod: HasManyAddAssociationMixin<AccountFinancialPeriod, number>;
-    declare addFinancialPeriods: HasManyAddAssociationsMixin<AccountFinancialPeriod, number>;
-    declare removeFinancialPeriod: HasManyRemoveAssociationMixin<AccountFinancialPeriod, number>;
-    declare removeFinancialPeriods: HasManyRemoveAssociationsMixin<AccountFinancialPeriod, number>;
-    declare createFinancialPeriod: HasManyCreateAssociationMixin<AccountFinancialPeriod>;
+    declare getAccountFinancialPeriods: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
+    declare countAccountFinancialPeriods: HasManyCountAssociationsMixin;
+    declare hasAccountFinancialPeriod: HasManyHasAssociationMixin<AccountFinancialPeriod, number>;
+    declare hasAccountFinancialPeriods: HasManyHasAssociationsMixin<AccountFinancialPeriod, number>;
+    declare setAccountFinancialPeriods: HasManySetAssociationsMixin<AccountFinancialPeriod, number>;
+    declare addAccountFinancialPeriod: HasManyAddAssociationMixin<AccountFinancialPeriod, number>;
+    declare addAccountFinancialPeriods: HasManyAddAssociationsMixin<AccountFinancialPeriod, number>;
+    declare removeAccountFinancialPeriod: HasManyRemoveAssociationMixin<AccountFinancialPeriod, number>;
+    declare removeAccountFinancialPeriods: HasManyRemoveAssociationsMixin<AccountFinancialPeriod, number>;
+    declare createAccountFinancialPeriod: HasManyCreateAssociationMixin<AccountFinancialPeriod>;
 
     declare getMutations: HasManyGetAssociationsMixin<Mutation>;
     declare countMutations: HasManyCountAssociationsMixin;
