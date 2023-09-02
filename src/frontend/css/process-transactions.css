@@ -1,0 +1,22 @@
+.transaction .postpone {
+    position: relative;
+    height: 24px;
+    margin-top: 5px;
+}
+
+.transaction .postpone * {
+    vertical-align: middle;
+}
+
+.transaction .postpone .material-symbols-outlined {
+    position: absolute;
+    left: calc(50% - 12px);
+}
+
+.transaction .postpone .postpone-text {
+    width: calc(50% - 12px);
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -1,0 +1,144 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: Roboto;
+    font-size: 14px;
+
+    --heading-bg-color: #8C694A;
+    --heading-fg-color: #D9B88F;
+    --main-bg-color: #A0B9D9;
+    --main-input-color: #CEDEF2;
+    --main-disabled-color: #8D9AA6;
+}
+
+body {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    /* grid-gap: 50px; */
+    width: 100vw;
+    height: 100vh;
+    margin: 0px;
+    background-color: var(--main-input-color);
+}
+
+/* header, main {
+    margin: auto;
+    width: 800px;
+} */
+
+/* header {
+    margin-top: 20px;
+    margin-bottom: 20px;
+} */
+
+header {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+    background: var(--heading-bg-color);
+    z-index: 1;
+}
+
+main {
+    overflow-y: auto;
+}
+
+/* main {
+    background: rgba(100, 255, 100, 0.5);
+} */
+
+/* header nav {
+    display: flex;
+    gap: 10px;
+} */
+
+header nav li {
+    padding: 10px;
+    list-style-type: none;
+}
+header nav a {
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+}
+
+.error {
+    /* background-color: var(--heading-fg-color); */
+    color: var(--heading-bg-color);
+}
+
+.clickable {
+    cursor: pointer;
+    /* color: var(--heading-bg-color); */
+}
+
+.material-symbols-outlined {
+    background-color: var(--heading-bg-color);
+    border-radius: 5px;
+}
+
+.clickable:hover {
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, .5);
+    cursor: pointer;
+}
+
+input, .selectize-input, .selectize-dropdown, .selectize-input.full {
+    box-shadow: none;
+    border: none;
+    font-size: 14px;
+    line-height: 19px;
+
+    display: inline-block;
+    color: #303030;
+    font-family: inherit;
+}
+
+input, .selectize-input, .selectize-input.full {
+    /* padding: 3px 8px; */
+    /* border-radius: 1px; */
+    padding: 0px 10px;
+    background-color: var(--main-input-color);
+}
+/* 
+.selectize-dropdown {
+    border-radius: 0px 0px 1px 1px;
+} */
+
+input:disabled, .selectize-control .selectize-input.disabled {
+    background: var(--main-disabled-color);
+    opacity: 1;
+}
+
+.balance-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.balance .header, .balance .row > *, .balance .total > * {
+    display: inline-block;
+    padding: 0px 10px;
+}
+
+.balance .header {
+    font-weight: bold;
+}
+
+.balance .label {
+    width: 70%;
+}
+
+.balance .currency {
+    width: 10%;
+}
+
+.balance .amount {
+    width: 20%;
+    text-align: right;
+}
+
+.transaction {
+    margin-bottom: 5px;
+    padding: 15px 25px;
+    background: var(--main-bg-color);
+    /* box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7); */
+}

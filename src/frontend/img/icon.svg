@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="48"
+   viewBox="0 -960 960 960"
+   width="48"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="icon.svg"
+   inkscape:version="1.2.2 (1:1.2.2+202305151915+b0a8486541)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <style>
+      path {
+         fill: black;
+      }
+      @media (prefers-color-scheme: dark) {
+         path {
+            fill: white;
+         }
+      }
+  </style>
+  <path
+     d="m 672,-504 q 20.4,0 34.2,-13.8 13.8,-13.8 13.8,-34.2 0,-20.4 -13.8,-34.2 -13.8,-13.8 -34.2,-13.8 -20.4,0 -34.2,13.8 -13.8,13.8 -13.8,34.2 0,20.4 13.8,34.2 13.8,13.8 34.2,13.8 z M 288,-624 h 240 v -72 H 288 Z M 120,-24 Q 79.2,-160.8 39.6,-297 0,-433.2 0,-576 0,-686.4 76.8,-763.2 153.6,-840 264,-840 h 240 q 34.8,-45.6 84.6,-70.8 49.8,-25.2 107.4,-25.2 30,0 51,21 21,21 21,51 0,6 -6,27.6 -4.8,13.2 -9,27 -4.2,13.8 -6.6,28.2 L 855.6,-672 H 960 v 334.8 L 824.4,-292.8 744,-24 H 480 v -96 h -96 v 96 z"
+     id="path2"
+     style="stroke-width:1" />
+</svg>

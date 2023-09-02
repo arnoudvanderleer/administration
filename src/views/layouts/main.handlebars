@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{{_sections.title}}}</title>
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/img/icon.svg" />
+    <link rel="icon" type="image/png" href="/img/icon-dark.png" />
+    <!-- Selectize style -->
+    <link rel="stylesheet" href="/selectize/css/selectize.css" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="/fonts/fonts.css" rel="stylesheet" />
+    <!-- Custom style -->
+    <link rel="stylesheet" href="/css/style.css" />
+    {{{_sections.style}}}
+</head>
+<body>
+    <header>
+        <span>Boekjaar: <select class="financial-period"></select></span>
+        <nav>
+            <li><a href="/upload-transactions">Upload transacties</a></li>
+            <li><a href="/process-transactions">Verwerk transacties</a></li>
+            <li><a href="/transaction-overview">Transactieoverzicht</a></li>
+            <li><a href="/account-overview">Rekeningoverzicht</a></li>
+        </nav>
+        <h2>Beheren</h2>
+        <nav>
+            <li><a href="/accounts">Beheer grootboekrekeningen</a></li>
+            <li><a href="/financial-periods">Beheer boekjaren</a></li>
+        </nav>
+    </header>
+    <main>
+        {{{body}}}
+    </main>
+
+    <template class="balance">
+        <div class="balance">
+            <p class="error error-message" style="display: none">Deze transactie bevat twee keer dezelfde grootboekrekening!</p>
+            <div class="balance-body">
+                <span class="header left"></span>
+                <span class="header right"></span>
+                <div class="accounts left"></div>
+                <div class="accounts right"></div>
+                <div class="total left"><span class="label">Totaal: </span><span class="currency">&euro;</span><span class="amount"></span></div>
+                <div class="total right"><span class="label">Totaal: </span><span class="currency">&euro;</span><span class="amount"></span></div>
+            </div>
+        </div>
+    </template>
+
+    <template class="row editable">
+        <span class="row">
+            <span class="label"></span><span class="currency">&euro;</span><input class="amount" />
+        </span>
+    </template>
+
+    <template class="row not-editable">
+        <span class="row">
+            <span class="label"></span><span class="currency">&euro;</span><span class="amount"></span>
+        </span>
+    </template>
+
+    <template class="bank-accounts">
+        <select></select>
+    </template>
+
+    <template class="non-bank-accounts">
+        <select></select>
+    </template>
+
+    <template class="transaction">
+        <div class="transaction">
+            <p><span class="date"></span>: <span class="description"></span></p>
+            <span class="bank-transaction"></span>
+        </div>
+    </template>
+
+    <script src="/jquery/jquery.min.js"></script>
+    <script src="/selectize/js/selectize.js"></script>
+    <script>
+        const current_financial_period = {{session.financial_period.id}};
+    </script>
+    <script type="module" src="/js/main.js"></script>
+    {{{_sections.scripts}}}
+</body>
+</html>

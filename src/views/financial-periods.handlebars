@@ -1,0 +1,31 @@
+{{#section 'title'}}Boekjaren{{/section}}
+
+{{#section 'scripts'}}
+    <script type="module" src="/js/financial-periods.js"></script>
+{{/section}}
+
+<style>
+    table {
+        width: 100%;
+    }
+</style>
+
+<table class="periods">
+    <thead>
+        <tr><th>Vanaf</th><th>Tot en met</th><th></th></tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot><tr>
+        <td><input class="start" type="date" /></td>
+        <td><input class="end" type="date" /></td>
+        <td><span class="save clickable material-symbols-outlined">save</span></td>
+    </tr></tfoot>
+</table>
+
+<template class="row-static">
+    <tr>
+        <td class="start"></td>
+        <td class="end"></td>
+        <td></td>
+    </tr>
+</template>

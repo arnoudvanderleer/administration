@@ -1,0 +1,23 @@
+{{#section 'title'}}Transactieoverzicht{{/section}}
+
+{{#section 'scripts'}}
+<script>let id = {{#if id}}{{id}}{{else}}null{{/if}};</script>
+<script src="/js/transaction-overview.js" type="module"></script>
+{{/section}}
+
+<div class="content"></div>
+
+<template class="transaction-template">
+    <div class="transaction">
+        <div class="transaction-content">
+            <p><span class="date"></span>: <span class="description" contenteditable="plaintext-only"></span></p>
+            <span class="bank-transaction"></span>
+            <table class="mutations">
+                <thead><tr><th>Post debet</th><th>Bedrag</th><th>Post credit</th><th>Bedrag</th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr><td>Totaal:</td><td>&euro;&nbsp;<span class="total-debit"></span></td><td>Totaal:</td><td>&euro;&nbsp;<span class="total-credit"></span></td></tr></tfoot>
+            </table>
+        </div>
+        <div class="postpone clickable"><span class="postpone-text">Uitstellen</span> <span class="material-symbols-outlined">expand_less</span></div>
+    </div>
+</template>

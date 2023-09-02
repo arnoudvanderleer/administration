@@ -1,0 +1,45 @@
+{{#section 'title'}}Grootboekrekeningen{{/section}}
+
+<style>
+    table, input {
+        width: 100%;
+    }
+    main {
+        padding: 10px;
+    }
+</style>
+
+<table class="data">
+    <thead>
+        <tr><th>Nummer</th><th>Naam</th><!--<th>Categorie</th>--></tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot><tr>
+        <td><input type="number" class="number" /></td>
+        <td><input type="text" class="name" /></td>
+        <td><span class="material-symbols-outlined add clickable">add</span></td>
+    </tr></tfoot>
+</table>
+
+<template class="data-row">
+    <tr>
+        <td class="number"></td>
+        <td class="name"></td>
+        <td class="events">
+            <span class="material-symbols-outlined edit clickable">edit</span>
+            <span class="material-symbols-outlined delete clickable">delete</span>
+        </td>
+    </tr>
+</template>
+
+<template class="edit-row">
+    <tr>
+        <td><input type="number" class="number" /></td>
+        <td><input type="text" class="name" /></td>
+        <td><span class="material-symbols-outlined save clickable">save</span></td>
+    </tr>
+</template>
+
+{{#section 'scripts'}}
+    <script type="module" src="/js/accounts.js"></script>
+{{/section}}

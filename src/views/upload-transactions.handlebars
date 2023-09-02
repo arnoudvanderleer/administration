@@ -1,0 +1,11 @@
+{{#section 'title'}}Transacties uploaden{{/section}}
+
+<form method="POST" action="api/upload-transactions" enctype="multipart/form-data">
+    <input type="file" name="transactions" /><br />
+    <div class="account"></div>
+    <input type="submit" value="Opsturen" /><br />
+</form>
+
+{{#section 'scripts'}}
+    <script src="/js/upload-transactions.js" type="module"></script>
+{{/section}}
