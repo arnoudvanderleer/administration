@@ -26,6 +26,10 @@ export default (async () => {
     })));
 
     router.post('/account', json_parser, async (req, res) => {
+        if (!req.session.financial_period?.current) {
+            return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
+        }
+
         if (!req.body.name) {
             return res.status(400).send("No account name was given.");
         }
@@ -177,17 +181,15 @@ export default (async () => {
     ));
 
     router.put('/transaction/:id', json_parser, async (req, res) => {
+        if (!req.session.financial_period?.current) {
+            return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
+        }
+
         let transaction = await models.Transaction.findOne({ where: { id: req.params.id } });
 
         if (transaction == null) {
             return res.status(404).send("Er bestaat geen transactie met dit id");
         }
-
-        console.log(
-            transaction.date,
-            (req.session.financial_period as FinancialPeriod).start_date,
-            (req.session.financial_period as FinancialPeriod).end_date,
-        );
 
         if (
             transaction.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||

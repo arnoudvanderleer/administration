@@ -16,6 +16,10 @@ export default (async () => {
     const models = await connect_db;
 
     router.post("/upload-transactions", async (req, res) => {
+        if (!req.session.financial_period?.current) {
+            return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
+        }
+
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).send('No files were uploaded.');
         }
@@ -88,6 +92,10 @@ export default (async () => {
     });
 
     router.get("/unprocessed-transactions/:id", async (req, res) => {
+        if (!req.session.financial_period?.current) {
+            return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
+        }
+
         res.send(await models.Transaction.findAll({
             where: {
                 complete: false,
@@ -104,8 +112,6 @@ export default (async () => {
             ],
         }));
     });
-
-    // Check financial period from here.
 
     router.get("/account-overview", async (req, res) => {
         // let result = await models.Account.

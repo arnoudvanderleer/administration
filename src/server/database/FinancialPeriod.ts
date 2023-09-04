@@ -5,6 +5,7 @@ export default class FinancialPeriod extends Model {
     declare id: number;
     declare start_date: Date;
     declare end_date: Date;
+    declare current: boolean;
 
     declare getAccountFinancialPeriods: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
     declare countAccountFinancialPeriods: HasManyCountAssociationsMixin;
@@ -28,5 +29,6 @@ export function init(sequelize: Sequelize) {
         },
         start_date: DataTypes.DATE,
         end_date: DataTypes.DATE,
+        current: DataTypes.BOOLEAN,
     }, {sequelize});
 }
