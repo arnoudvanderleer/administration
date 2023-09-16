@@ -114,7 +114,6 @@ export default (async () => {
     });
 
     router.get("/account-overview", async (req, res) => {
-        // let result = await models.Account.
         let result = await models.Account.findAll({
             include: [
                 {
@@ -132,7 +131,6 @@ export default (async () => {
                 {
                     model: models.AccountFinancialPeriod,
                     where: { FinancialPeriodId: req.session.financial_period?.id },
-                    attributes: [],
                 }
             ],
             attributes: {
@@ -140,7 +138,7 @@ export default (async () => {
                     [Sequelize.fn('SUM', Sequelize.col("Mutations.amount")), 'amount_sum']
                 ]
             },
-            group: [Sequelize.col("Account.id")],
+            group: [Sequelize.col("Account.id"), Sequelize.col("AccountFinancialPeriods.id")],
             order: [Sequelize.col("Account.number")],
         });
         res.send(result);

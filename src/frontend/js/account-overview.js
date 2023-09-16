@@ -1,4 +1,4 @@
-import Balance from "./common/Balance.js";
+import AccountOverview from "./common/AccountOverview.js";
 
 (async () => {
     let accounts = await $.getJSON("/api/account-overview");
@@ -6,14 +6,15 @@ import Balance from "./common/Balance.js";
 
     for (let account of accounts) {
         let category = Math.floor(account.number / 1000 - 1);
-        let amount = ([0, 3].indexOf(category) > -1 ? -parseFloat(account.amount_sum) : parseFloat(account.amount_sum)) || 0;
+        let amount = ([0, 3].indexOf(category) > -1 ? (-1) : 1) * (parseFloat(account.AccountFinancialPeriods[0].start_amount) + parseFloat(account.amount_sum)) || 0;
         categories[category].push({
             account,
             amount,
+            budget: account.AccountFinancialPeriods[0].budget,
         });
     }
 
-    let results = new Balance(false, [{
+    let results = new AccountOverview(false, [{
         header: "Debet",
         edit_enabled: false,
         rows: categories[0],
@@ -27,9 +28,10 @@ import Balance from "./common/Balance.js";
     categories[3].splice(0, 0, {
         account: { is_bank: false, id: -1, number: 4000, name: 'Eigen Vermogen' },
         amount: totals[0] - totals[1],
+        budget: 0,
     });
 
-    let balance = new Balance(false, [{
+    let balance = new AccountOverview(false, [{
         header: "Activa",
         edit_enabled: false,
         rows: categories[2],

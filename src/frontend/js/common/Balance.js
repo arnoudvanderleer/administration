@@ -116,7 +116,7 @@ export default class Balance {
     }
 }
 
-class BalanceRow extends EventTarget {
+export class BalanceRow extends EventTarget {
     constructor(editable, edit_enabled, account, amount) {
         super();
 

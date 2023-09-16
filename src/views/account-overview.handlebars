@@ -5,6 +5,23 @@
     .balance {
         margin-bottom: 100px;
     }
+
+    .balance .label {
+        width: 50%;
+    }
+
+    .balance .currency, .balance .budget-currency {
+        width: 10%;
+    }
+
+    .balance .amount, .balance .budget {
+        width: 15%;
+        text-align: right;
+    }
+
+    .balance .budget, .balance .budget-currency {
+        color: var(--main-disabled-color);
+    }
 </style>
 {{/section}}
 
@@ -15,8 +32,10 @@
     <div class="balance"></div>
 </div>
 
-<template class="account-row-template">
-    <div class="account clickable"><span class="label"></span><span class="amount"></span></div>
+<template class="account-overview-row">
+    <span class="row">
+        <span class="label"></span><span class="currency">&euro;</span><span class="amount"></span><span class="budget-currency">&euro;</span><span class="budget"></span>
+    </span>
 </template>
 
 {{#section 'scripts'}}
