@@ -6,6 +6,7 @@ import FinancialPeriod, {init as initFinancialPeriod} from './FinancialPeriod';
 import AccountFinancialPeriod, {init as initAccountFinancialPeriod} from './AccountFinancialPeriod';
 import Mutation, {init as initMutation} from "./Mutation";
 import Transaction, {init as initTransaction} from "./Transaction";
+import User, {init as initUser} from "./User";
 
 export default (async () => {
     const sequelize = new Sequelize('postgres', 'postgres', 'accountant', {
@@ -27,6 +28,7 @@ export default (async () => {
     initAccountFinancialPeriod(sequelize);
     initMutation(sequelize);
     initTransaction(sequelize);
+    initUser(sequelize);
 
     Account.hasMany(AccountFinancialPeriod);
     AccountFinancialPeriod.belongsTo(Account);
@@ -53,5 +55,6 @@ export default (async () => {
         AccountFinancialPeriod,
         Mutation,
         Transaction,
+        User,
     };
 })();

@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <title>{{title}}</title>
+        <style>
+            html {
+                --heading-bg-color: #8C694A;
+                --heading-fg-color: #D9B88F;
+                --main-bg-color: #A0B9D9;
+                --main-input-color: #CEDEF2;
+                --main-disabled-color: #8D9AA6;
+            }
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                width: 100vw;
+                margin: 0px;
+                background-color: var(--main-bg-color);
+            }
+            main {
+                width: 500px;
+                background-color: var(--heading-bg-color);
+                padding: 25px;
+            }
+
+            h1 {
+                margin-top: 0px;
+            }
+
+            form {
+                margin: 0px;
+            }
+
+            input, label {
+                height: 18px;
+                line-heigh: 18px;
+                margin-bottom: 1px;
+                vertical-align: middle;
+            }
+
+            label {
+                width: 30%;
+                display: inline-block;
+            }
+
+            input {
+                width: 70%;
+                background-color: var(--main-input-color);
+                border: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h1>{{title}}</h1>
+            <form method="post" action="/auth">
+                <label for="username">Gebruikersnaam:</label><input type="text" name="username" minlength="4" required /> <br />
+                <label for="password">Wachtwoord:</label><input type="password" name="password" minlength="12" required /> <br />
+                <label></label><input type="submit" value="{{action}}" />
+            </form>
+        </main>
+    </body>
+</html>

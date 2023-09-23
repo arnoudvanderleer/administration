@@ -10,10 +10,12 @@ import FinancialPeriod from './database/FinancialPeriod';
 import frontend from './endpoints/frontend';
 import api from './endpoints/api';
 import models_api from './endpoints/models-api';
+import auth from './endpoints/auth';
 
 declare module 'express-session' {
   export interface SessionData {
-    financial_period: FinancialPeriod;
+    financial_period: FinancialPeriod | null;
+    user_id : number | null;
   }
 }
 
@@ -48,12 +50,13 @@ app.use(fileUpload());
 (async () => {
     const models = await connect_db;
 
-    app.use(async (req, _, next) => {
-        if (!req.session.financial_period) {
-            req.session.financial_period = (await models.FinancialPeriod.findOne({
-                raw: true,
-                order: [['start_date', 'DESC']]
-            }) as FinancialPeriod);
+    app.use("/auth", await auth);
+
+    app.use(async (req, res, next) => {
+        if (req.session.user_id == null) {
+            return res.writeHead(302, {
+                'Location': '/auth',
+            }).send();
         }
         next();
     });
