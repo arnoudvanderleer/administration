@@ -36,6 +36,12 @@
         </nav>
     </header>
     <main>
+        {{#if backup_needed}}
+            <a class="backup-banner" href="/api/backup">
+                Tijd voor een backup
+            </a>
+        {{/if}}
+
         {{{body}}}
     </main>
 

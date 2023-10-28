@@ -5,6 +5,7 @@ export default class User extends Model {
     declare username: string;
     declare salt: string;
     declare password: string;
+    declare last_backup: Date;
 };
 
 export function init(sequelize: Sequelize) {
@@ -27,5 +28,6 @@ export function init(sequelize: Sequelize) {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        last_backup : DataTypes.DATE,
     }, {sequelize});
 }

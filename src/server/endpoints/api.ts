@@ -1,6 +1,9 @@
 import express from 'express';
 import { parse } from 'csv-parse';
 import bodyParser from 'body-parser';
+import util from 'util';
+import { exec } from 'child_process';
+import fs from 'fs';
 
 import connect_db from '../database/database';
 import BankTransaction from '../database/BankTransaction';
@@ -11,6 +14,8 @@ import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
 const json_parser = bodyParser.json();
+
+const exec_promise = util.promisify(exec);
 
 export default (async () => {
     const models = await connect_db;
@@ -149,6 +154,29 @@ export default (async () => {
         if (!period) return res.status(400).send();
         req.session.financial_period = period;
         res.send();
+    });
+
+    router.get("/backup", async (req, res) => {
+        let host = 'db';
+        let username = 'postgres';
+        let password = 'accountant';
+        let database = 'postgres';
+        let port = 5432;
+
+        let name = `./backup-${new Date().getTime()}.tar.gz`;
+
+        let command = `PGPASSWORD="${password}" pg_dump -U "${username}" -h "${host}" -p ${port} -F t "${database}" | gzip > "${name}"`;
+        await exec_promise(command);
+        console.log("X1");
+        res.download(name, async e => {
+            await util.promisify(fs.unlink)(name);
+
+            let user = await models.User.findByPk(req.session.user_id ?? 0);
+            if (user) {
+                user.last_backup = new Date();
+                await user.save();
+            }
+        });
     });
 
     return router;
