@@ -1,4 +1,5 @@
 import Transaction from "./common/Transaction.js";
+import { Transaction as TransactionModel } from "./common/api.js";
 
 let transaction_objects = [];
 
@@ -15,8 +16,7 @@ let transaction_objects = [];
 })();
 
 async function show_transactions(id) {
-    let transactions = await $.getJSON(`/api/unprocessed-transactions/${id}`);
-    transaction_objects = transactions.map(populate_transaction);
+    let transaction_objects = (await TransactionModel.get_unprocessed(id)).map(populate_transaction);
     $('.content').append(transaction_objects.map(t => t.dom));
     $("<button>Opslaan</button>")
         .appendTo(".content")
@@ -76,15 +76,10 @@ function save() {
         }))).reduce((a, b) => a.concat(b), []);
 
         await $(transaction.dom).delay(i * 100).promise();
-        await $.ajax({
-            type: "PUT",
-            url: `/models/transaction/${transaction.transaction.id}`,
-            data: JSON.stringify({
-                Mutations: mutations,
-                description: $(transaction.dom).find(".description").text(),
-                complete: true,
-            }),
-            contentType: "application/json",
+        await TransactionModel.update(transaction.transaction.id, {
+            Mutations: mutations,
+            description: $(transaction.dom).find(".description").text(),
+            complete: true,
         });
         await $(transaction.dom).slideUp(500).promise();
         $(transaction.dom).remove();

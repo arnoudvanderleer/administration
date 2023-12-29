@@ -1,8 +1,9 @@
 import { clone_template, render } from "./common/common.js";
+import { Account } from "./common/api.js";
 
 load();
 
-let save_new = () => {
+let save_new = async () => {
     let row = $("table.data tfoot tr");
     let data = {
         number : row.find(".number").val(),
@@ -13,10 +14,8 @@ let save_new = () => {
             budget: parseFloat(row.find(".budget").val()),
         }],
     };
-    add_account(data, result => {
-        add_row(result);
-        row.find("input").val("");
-    });
+    add_row(await Account.add(data));
+    row.find("input").val("");
 }
 
 $("table.data tfoot .add").click(save_new);
@@ -35,7 +34,10 @@ function add_row(account, place) {
     row.find(".start-amount").text(account.AccountFinancialPeriods.length > 0 ? render(account.AccountFinancialPeriods[0].start_amount) : "");
     row.find(".budget").text(account.AccountFinancialPeriods.length > 0 ? render(account.AccountFinancialPeriods[0].budget) : "");
     row.find(".edit").click(() => edit_row(account.id, row));
-    row.find(".delete").click(() => delete_account(account.id, () => row.remove()));
+    row.find(".delete").click(async () => {
+        await Account.delete(account.id);
+        row.remove();
+    });
 
     if (place == null) {
         $("table.data tbody").append(row);
@@ -51,17 +53,18 @@ function edit_row(id, row) {
     }
     form_row.find(".enabled").prop("checked", row.find(".enabled").is(":checked"));
     row.replaceWith(form_row);
-    let save = () => {
+    let save = async () => {
         let data = {
             number : form_row.find(".number").val(),
             name : form_row.find(".name").val(),
             AccountFinancialPeriods: form_row.find(".enabled").is(":checked") ? [{
                 FinancialPeriodId: current_financial_period,
-                start_amount: parseFloat(form_row.find(".start-amount").val()),
-                budget: parseFloat(form_row.find(".budget").val()),
+                start_amount: parseFloat(form_row.find(".start-amount").val()) || 0,
+                budget: parseFloat(form_row.find(".budget").val()) || 0,
             }] : []
         };
-        update_account(id, data, () => add_row({...data, id}, form_row));
+        await Account.update(id, data);
+        add_row({...data, id}, form_row);
     }
     form_row.find(".save").click(save);
     form_row.find("input").keydown(e => {
@@ -72,35 +75,7 @@ function edit_row(id, row) {
 }
 
 async function load() {
-    let accounts = await $.getJSON("/models/account");
+    let accounts = await Account.get_all();
     $("table.data tbody").empty();
     accounts.forEach(a => add_row(a));
-}
-
-function add_account(data, success) {
-    $.ajax({
-        type: "POST",
-        url: "/models/account",
-        contentType : "application/json",
-        data: JSON.stringify(data),
-        success,
-    });
-}
-
-function update_account(id, data, success) {
-    $.ajax({
-        type: "PUT",
-        url: "/models/account/" + id,
-        contentType : "application/json",
-        data: JSON.stringify(data),
-        success,
-    });
-}
-
-function delete_account(id, success) {
-    $.ajax({
-        type: "DELETE",
-        url: "/models/account/" + id,
-        success,
-    });
 }

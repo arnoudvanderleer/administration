@@ -1,8 +1,9 @@
 import { clone_template, render_date } from "./common/common.js";
+import { FinancialPeriod } from "./common/api.js";
 
 (async () => {
-    let financial_periods = await $.getJSON("/models/financial-period");
-    financial_periods.forEach(add_row);
+    (await FinancialPeriod.get_all())
+        .forEach(add_row);
 })();
 
 $("table.periods tfoot span.save").click(async function () {
@@ -10,12 +11,7 @@ $("table.periods tfoot span.save").click(async function () {
         start_date: $("table.periods tfoot input.start").val(),
         end_date: $("table.periods tfoot input.end").val(),
     };
-    await $.ajax({
-        type: "POST",
-        url: '/models/financial-period',
-        contentType : "application/json",
-        data: JSON.stringify(data),
-    });
+    await FinancialPeriod.add(data);
     add_row(data);
     $(this).find("input").val(null);
 });

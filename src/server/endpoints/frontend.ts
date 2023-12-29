@@ -8,6 +8,7 @@ export default (async () => {
     router.get('/accounts',                 async (req, res) => res.render("accounts",              await make_handlebars_data(req)));
     router.get('/financial-periods',        async (req, res) => res.render("financial-periods",     await make_handlebars_data(req)));
     router.get('/process-transactions',     async (req, res) => res.render("process-transactions",  await make_handlebars_data(req)));
+    router.get('/add-transaction',          async (req, res) => res.render("add-transaction",       await make_handlebars_data(req)));
     router.get('/upload-transactions',      async (req, res) => res.render("upload-transactions",   await make_handlebars_data(req)));
     router.get('/transaction-overview',     async (req, res) => res.render("transaction-overview",  await make_handlebars_data(req)));
     router.get('/transaction-overview/:id', async (req, res) => res.render("transaction-overview",  await make_handlebars_data(req, {id : req.params.id})));

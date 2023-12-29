@@ -1,6 +1,5 @@
 import express from 'express';
 import { parse } from 'csv-parse';
-import bodyParser from 'body-parser';
 import util from 'util';
 import { exec } from 'child_process';
 import fs from 'fs';
@@ -9,11 +8,10 @@ import connect_db from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
-import { Op, Sequelize, Transaction } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
-const json_parser = bodyParser.json();
 
 const exec_promise = util.promisify(exec);
 
@@ -21,10 +19,6 @@ export default (async () => {
     const models = await connect_db;
 
     router.post("/upload-transactions", async (req, res) => {
-        if (!req.session.financial_period?.current) {
-            return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
-        }
-
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).send('No files were uploaded.');
         }
@@ -149,13 +143,6 @@ export default (async () => {
         res.send(result);
     });
 
-    router.put("/financial-period", json_parser, async (req, res) => {
-        let period = await models.FinancialPeriod.findByPk(req.body.id);
-        if (!period) return res.status(400).send();
-        req.session.financial_period = period;
-        res.send();
-    });
-
     router.get("/backup", async (req, res) => {
         let host = 'db';
         let username = 'postgres';
@@ -167,7 +154,6 @@ export default (async () => {
 
         let command = `PGPASSWORD="${password}" pg_dump -U "${username}" -h "${host}" -p ${port} -F t "${database}" | gzip > "${name}"`;
         await exec_promise(command);
-        console.log("X1");
         res.download(name, async e => {
             await util.promisify(fs.unlink)(name);
 

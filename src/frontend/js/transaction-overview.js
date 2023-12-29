@@ -1,7 +1,8 @@
 import Transaction from "./common/Transaction.js";
+import { Account, Transaction as TransactionModel } from "./common/api.js";
 
 (async () => {
-    let transactions = await $.getJSON(id ? `/models/account/${id}/transaction` : "/models/transaction/");
+    let transactions = id ? await Account.get_transactions(id) : await TransactionModel.get_all();
 
     $(".content").append(transactions.map(t => {
         let transaction_object = new Transaction(t, false);
@@ -17,15 +18,10 @@ import Transaction from "./common/Transaction.js";
                         AccountId: row.account.id,
                     }))).reduce((a, b) => a.concat(b), []);
 
-                    await $.ajax({
-                        type: "PUT",
-                        url: `/models/transaction/${transaction_object.transaction.id}`,
-                        data: JSON.stringify({
-                            Mutations: mutations,
-                            description: $(transaction_object.dom).find(".description").text(),
-                            complete: true,
-                        }),
-                        contentType: "application/json",
+                    await TransactionModel.update(transaction_object.transaction.id, {
+                        Mutations: mutations,
+                        description: $(transaction_object.dom).find(".description").text(),
+                        complete: true,
                     });
                 }
                 transaction_object.editable = !transaction_object._editable;

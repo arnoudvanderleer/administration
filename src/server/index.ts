@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import { create as create_handlebars } from 'express-handlebars';
 import fileUpload from 'express-fileupload';
 import session from 'express-session';
@@ -11,6 +11,7 @@ import frontend from './endpoints/frontend';
 import api from './endpoints/api';
 import models_api from './endpoints/models-api';
 import auth from './endpoints/auth';
+import bodyParser from 'body-parser';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -46,6 +47,13 @@ app.use(session({
 }));
 app.use(fileUpload());
 
+const check_current: RequestHandler = (req, res, next) => {
+    if (!req.session.financial_period?.current) {
+        return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
+    }
+    next();
+};
+
 (async () => {
     const models = await connect_db;
 
@@ -59,6 +67,18 @@ app.use(fileUpload());
         }
         next();
     });
+
+    app.use(bodyParser.json());
+
+    app.put("/api/financial-period", async (req, res) => {
+        let period = await models.FinancialPeriod.findByPk(req.body.id);
+        if (!period) return res.status(400).send();
+        req.session.financial_period = period;
+        res.send();
+    });
+
+    app.post('*', check_current)
+        .put('*', check_current);
 
     app.use("/models", await models_api);
     app.use("/api", await api);

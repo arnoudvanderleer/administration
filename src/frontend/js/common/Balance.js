@@ -53,7 +53,7 @@ export default class Balance {
         let totals = this.totals();
         this.dom.find(".total .amount").each((i, el) => $(el).text(render(totals[i])));
 
-        let totals_valid = render(totals[0]) == render(totals[1]);
+        let totals_valid = totals[0] > 0 && (render(totals[0]) == render(totals[1]));
         let accounts_valid = this.validate_accounts();
 
         this.valid = totals_valid && accounts_valid;

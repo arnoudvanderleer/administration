@@ -5,10 +5,11 @@ import connect_db from '../database/database';
 import crypto from 'crypto';
 
 const router = express.Router();
-const urlencoded_parser = bodyParser.urlencoded({ extended: false });
 
 export default (async () => {
     let models = await connect_db;
+
+    router.use(bodyParser.urlencoded({ extended: false }));
 
     router.get('/', async (req, res) => {
         if (req.session.user_id != null) {
@@ -26,7 +27,7 @@ export default (async () => {
         res.render("login", params);
     });
 
-    router.post("/", urlencoded_parser, async (req, res) => {
+    router.post("/", async (req, res) => {
         if (req.session.user_id != null) {
             return res.writeHead(302, {
                 'Location': '/',

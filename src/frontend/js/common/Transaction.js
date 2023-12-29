@@ -16,7 +16,7 @@ export default class Transaction {
             this.balance.editable = editable;
         }
 
-        this.dom.find(".description").text(this.transaction.description).attr({contenteditable: this.editable ? "plaintext-only" : false});
+        this.dom.find(".description").attr({contenteditable: this._editable ? "plaintext-only" : false});
     }
 
     populate() {
@@ -43,12 +43,12 @@ export default class Transaction {
         this.balance = new Balance(this._editable, [
             {
                 header: "Debet",
-                edit_enabled: (this.transaction.BankTransaction && this.transaction.BankTransaction.is_credit),
+                edit_enabled: !this.transaction.BankTransaction || this.transaction.BankTransaction.is_credit,
                 rows: mutations[0],
             },
             {
                 header: "Credit",
-                edit_enabled: (this.transaction.BankTransaction && !this.transaction.BankTransaction.is_credit),
+                edit_enabled: !this.transaction.BankTransaction || !this.transaction.BankTransaction.is_credit,
                 rows: mutations[1],
             }
         ]);
