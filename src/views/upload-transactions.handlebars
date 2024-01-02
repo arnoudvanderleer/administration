@@ -1,5 +1,11 @@
 {{#section 'title'}}Transacties uploaden{{/section}}
 
+<style>
+    main {
+        background-color: var(--main-bg-color);
+    }
+</style>
+
 <form method="POST" action="api/upload-transactions" enctype="multipart/form-data">
     <input type="file" name="transactions" /><br />
     <div class="account"></div>

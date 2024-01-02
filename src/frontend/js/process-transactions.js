@@ -1,22 +1,22 @@
 import Transaction from "./common/Transaction.js";
 import { Transaction as TransactionModel } from "./common/api.js";
+import { get_account_select } from "./common/common.js";
 
 let transaction_objects = [];
 
 (async () => {
-    // (await get_account_select(true))
-    //     .appendTo(".content")
-    //     .selectize();
-    // $("<button>Verwerken</button>").appendTo(".content").click(function () {
-    //     let id = $(this).siblings("select").val();
-    //     $(this).parent().children().remove();
-    //     show_transactions(id);
-    // });
-    show_transactions(3);
+    (await get_account_select(true))
+        .appendTo(".content")
+        .selectize();
+    $("<button>Verwerken</button>").appendTo(".content").click(function () {
+        let id = $(this).siblings("select").val();
+        $(this).parent().children().remove();
+        show_transactions(id);
+    });
 })();
 
 async function show_transactions(id) {
-    let transaction_objects = (await TransactionModel.get_unprocessed(id)).map(populate_transaction);
+    transaction_objects = (await TransactionModel.get_unprocessed(id)).map(populate_transaction);
     $('.content').append(transaction_objects.map(t => t.dom));
     $("<button>Opslaan</button>")
         .appendTo(".content")
@@ -78,6 +78,7 @@ function save() {
         await $(transaction.dom).delay(i * 100).promise();
         await TransactionModel.update(transaction.transaction.id, {
             Mutations: mutations,
+            date: transaction.date,
             description: $(transaction.dom).find(".description").text(),
             complete: true,
         });

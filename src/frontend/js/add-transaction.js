@@ -3,12 +3,13 @@ import { Transaction as TransactionModel } from "./common/api.js";
 
 (async () => {
     let transaction = new Transaction({
-        date: new Date(),
+        date: new Date().toISOString().substring(0, 10),
         description: "Omschrijving",
         Mutations: [],
     }, true);
 
     $(".transactions").append(transaction.dom);
+    $(transaction.dom).find(".date").replaceWith(`<input type="date" class="date" value="${transaction.transaction.date}" />`);
 
     let save_button = $(`<span class="material-symbols-outlined">save</span>`)
         .addClass("clickable")
@@ -23,7 +24,7 @@ import { Transaction as TransactionModel } from "./common/api.js";
 
             await TransactionModel.add({
                 Mutations: mutations,
-                date: transaction.transaction.date.getTime(),
+                date: $(transaction.dom).find(".date").val(),
                 description: $(transaction.dom).find(".description").text(),
                 complete: true,
             });

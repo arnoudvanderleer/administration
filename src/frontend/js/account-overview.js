@@ -14,41 +14,33 @@ import { Account } from "./common/api.js";
         });
     }
 
-    let results = new AccountOverview(false, [{
-        header: "Debet",
-        edit_enabled: false,
-        rows: categories[0],
-    }, {
-        header: "Credit",
-        edit_enabled: false,
-        rows: categories[1],
-    }]);
-
-    let totals = results.totals();
     categories[3].splice(0, 0, {
         account: { is_bank: false, id: -1, number: 4000, name: 'Eigen Vermogen' },
-        amount: totals[0] - totals[1],
+        amount: categories[2].map(a => a.amount).concat(categories[3].map(a => -a.amount)).reduce((a, b) => a + b, 0),
         budget: 0,
     });
 
-    let balance = new AccountOverview(false, [{
-        header: "Activa",
-        edit_enabled: false,
-        rows: categories[2],
-    }, {
-        header: "Passiva",
-        edit_enabled: false,
-        rows: categories[3],
-    }]);
-
-    results.rows.concat(balance.rows).forEach(column => column.forEach(row =>
-        row.dom.click(() => {
-            if (row.account.id < 0) return;
-            window.location.href = `/transaction-overview/${row.account.id}`
-        }
-        ).addClass("clickable")
-    ));
-
-    $(".balance").eq(0).replaceWith(results.dom);
-    $(".balance").eq(1).replaceWith(balance.dom);
+    [[
+        { header: "Debet", index: 0 },
+        { header: "Credit", index: 1 },
+    ], [
+        { header: "Activa", index: 2 },
+        { header: "Passiva", index: 3 },
+    ]].forEach((columns, i) => {
+        let overview = new AccountOverview(false, 
+            columns.map(column => ({
+                header: column.header,
+                edit_enabled: false,
+                rows: categories[column.index],
+            }))
+        );
+        overview.rows.forEach(column => column.forEach(row =>
+            row.dom.click(() => {
+                if (row.account.id < 0) return;
+                window.location.href = `/transaction-overview/${row.account.id}`
+            }
+            ).addClass("clickable")
+        ));
+        $(".balance").eq(i).replaceWith(overview.dom);
+    });
 })();
