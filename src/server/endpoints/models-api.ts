@@ -117,6 +117,9 @@ export default (async () => {
 
             if (req.body.AccountFinancialPeriods.length == 0) {
                 if (existing_periods.length > 0) {
+                    if (parseFloat(existing_periods[0].start_amount)) {
+                        return res.status(400).send('Kan deze rekening en dit boekjaar niet ontkoppelen omdat de startwaarde niet 0 is');
+                    }
                     let matching_mutations = await account.getMutations({
                         include: {
                             model: models.Transaction,
@@ -128,7 +131,7 @@ export default (async () => {
                         }
                     });
                     if (matching_mutations.length > 0) {
-                        return res.status(400).send(`Kan dit account en dit boekjaar niet ontkoppelen omdat het nog mutaties bevat: ${JSON.stringify(matching_mutations)}`);
+                        return res.status(400).send(`Kan deze rekening en dit boekjaar niet ontkoppelen omdat het nog mutaties bevat: ${JSON.stringify(matching_mutations)}`);
                     }
                     await existing_periods[0].destroy();
                 }

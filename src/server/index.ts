@@ -15,8 +15,8 @@ import bodyParser from 'body-parser';
 
 declare module 'express-session' {
   export interface SessionData {
-    financial_period: FinancialPeriod | null;
-    user_id : number | null;
+    financial_period: FinancialPeriod;
+    user_id : number;
   }
 }
 
@@ -60,7 +60,7 @@ const check_current: RequestHandler = (req, res, next) => {
     app.use("/auth", await auth);
 
     app.use(async (req, res, next) => {
-        if (req.session.user_id == null) {
+        if (!req.session.user_id) {
             return res.writeHead(302, {
                 'Location': '/auth',
             }).send();
@@ -86,6 +86,6 @@ const check_current: RequestHandler = (req, res, next) => {
 
     let port = 8080;
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+        console.log(`Administration app listening on port ${port}`)
     });
 })();

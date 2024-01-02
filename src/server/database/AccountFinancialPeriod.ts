@@ -4,8 +4,8 @@ import FinancialPeriod from "./FinancialPeriod";
 
 export default class AccountFinancialPeriod extends Model {
     declare id: number;
-    declare start_amount: number;
-    declare budget: number;
+    declare start_amount: string;
+    declare budget: string;
 
     declare getAccount: BelongsToGetAssociationMixin<Account>;
     declare setAccount: BelongsToSetAssociationMixin<Account, number>;

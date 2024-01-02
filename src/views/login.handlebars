@@ -49,16 +49,100 @@
                 background-color: var(--main-input-color);
                 border: 0px;
             }
+
+            label.date {
+                width: 20%;
+                display: inline-block;
+            }
+
+            input[type="date"] {
+                width: 30%;
+                background-color: var(--main-input-color);
+                border: 0px;
+            }
+            
+            table {
+                width: 100%;
+            }
+
+            table input {
+                width: 100%;
+            }
+
+            summary {
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
         <main>
             <h1>{{title}}</h1>
             <form method="post" action="/auth">
-                <label for="username">Gebruikersnaam:</label><input type="text" name="username" minlength="4" required /> <br />
-                <label for="password">Wachtwoord:</label><input type="password" name="password" minlength="12" required /> <br />
+                <label>Gebruikersnaam:</label><input type="text" name="username" minlength="4" required />
+                <label>Wachtwoord:</label><input type="password" name="password" minlength="12" required />
+                {{#if first}}
+                    <h2>Boekjaar</h2>
+                    <details>
+                        <summary>
+                            Uitleg
+                        </summary>
+                        <p>De boekhouding is georganiseerd in <i>boekjaren</i>. Iedere transactie valt in een boekjaar, en zolang een boekjaar bezig is, kun de transacties van dat boekjaar wijzigen. Aan het einde sluit je een boekjaar, waarmee je zorgt dat de transacties niet meer gewijzigd, maar alleen nog bekeken kunnen worden. Wat zijn de begin- en einddatum van het eerste boekjaar?</p>
+                    </details>
+                    <label class="date">Vanaf: </label><input type="date" name="financial_period" required /><label class="date">&nbsp;Tot: </label><input type="date" name="financial_period" required />
+                    <h2>Grootboekrekeningen</h2>
+                    <details>
+                        <summary>
+                            Uitleg
+                        </summary>
+                        <p>Alle uitgaven, inkomsten, bezittingen en schulden kun je categoriseren in <i>grootboekrekeningen</i>. Bijvoorbeeld "Bankrekening", "Abonnementen", "Eten", "Nog te ontvangen tikkies" etc. Vul hieronder de eerste grootboekrekeningen in die je wilt gaan gebruiken. Merk op: dit is de enige keer dat je grootboekrekeningen met een beginwaarde kunt toevoegen (zoals bankrekeningen en schulden). Later kun je nog wel nieuwe grootboekrekeningen toevoegen, maar die beginnen dan op &euro;&nbsp;0,-.</p>
+                        <p>Het nummer van een grootboekrekening is een snelle manier om aan de rekening te refereren. Ook bepaalt dit nummer de plaats waar deze in het overzicht verschijnt. De grootboeknummers 0-999 verschijnen als inkomsten, de grootboeknummers 1000-1999 als uitgaven, 2000-2999 als bezittingen en 3000-3999 als schulden.</p>
+                        <p>De beginwaarde is de waarde die de grootboekrekening aan het begin van het boekjaar heeft. Bijvoorbeeld de hoogte van de schuld, de hoeveelheid geld die je voor een bepaald doel hebt gespaard, of de hoeveelheid geld op de bankrekening.</p>
+                        <p>Vink het vakje onder "bank" aan als het om een bankrekening gaat. Dan krijgt die een aparte behandeling (zoals de mogelijkheid om een transactieoverzicht van de bank in te lezen).</p>
+                    </details>
+                    <table>
+                        <thead><tr>
+                            <th>Naam</th>
+                            <th style="width: 20%;">Nummer</th>
+                            <th style="width: 20%;">Beginwaarde</th>
+                            <th>Bank</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody class="accounts-body"></tbody>
+                    </table>
+                    <button class="add-account">+</button> <br />
+                {{/if}}
                 <label></label><input type="submit" value="{{action}}" />
             </form>
         </main>
     </body>
+
+    <template class="account-row">
+        <tr>
+            <td><input type="text" name="account_name" required /></td>
+            <td><input type="number" name="account_number" required /></td>
+            <td><input type="number" name="account_value" required /></td>
+            <td><input type="checkbox" name="account_is_bank" required /></td>
+            <td><button class="remove-line">x</button></td>
+        </tr>
+    </template>
+
+    <script>
+        let table_body = document.querySelector(".accounts-body");
+        let template = document.querySelector(".account-row").content.firstElementChild;
+
+        function add_account() {
+            let node = template.cloneNode(true);
+            table_body.appendChild(node);
+            node.querySelector(".remove-line").addEventListener("click", e => {
+                table_body.removeChild(node);
+                e.preventDefault();
+            });
+        }
+
+        document.querySelector(".add-account").addEventListener("click", e => {
+            add_account();
+            e.preventDefault();
+        });
+        add_account();
+    </script>
 </html>
