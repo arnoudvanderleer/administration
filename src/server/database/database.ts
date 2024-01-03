@@ -30,19 +30,29 @@ export default (async () => {
     initTransaction(sequelize);
     initUser(sequelize);
 
-    Account.hasMany(AccountFinancialPeriod);
+    Account.hasMany(AccountFinancialPeriod, {
+        onDelete: 'RESTRICT',
+    });
     AccountFinancialPeriod.belongsTo(Account);
 
-    Account.hasMany(Mutation);
+    Account.hasMany(Mutation, {
+        onDelete: 'RESTRICT',
+    });
     Mutation.belongsTo(Account);
 
-    FinancialPeriod.hasMany(AccountFinancialPeriod);
+    FinancialPeriod.hasMany(AccountFinancialPeriod, {
+        onDelete: 'RESTRICT',
+    });
     AccountFinancialPeriod.belongsTo(FinancialPeriod);
 
-    Transaction.hasOne(BankTransaction);
+    Transaction.hasOne(BankTransaction, {
+        onDelete: 'CASCADE',
+    });
     BankTransaction.belongsTo(Transaction);
 
-    Transaction.hasMany(Mutation);
+    Transaction.hasMany(Mutation, {
+        onDelete: 'CASCADE',
+    });
     Mutation.belongsTo(Transaction);
 
     sequelize.sync();

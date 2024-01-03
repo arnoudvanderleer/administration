@@ -6,9 +6,9 @@ import { Account, Transaction as TransactionModel } from "./common/api.js";
 
     $(".content").append(transactions.map(t => {
         let transaction_object = new Transaction(t, false);
-        let edit_button = $(`<span class="material-symbols-outlined">edit</span>`)
+        $(`<span class="material-symbols-outlined">edit</span>`)
             .addClass("clickable")
-            .appendTo(transaction_object.dom).click(async () => {
+            .appendTo(transaction_object.dom).click(async function(){
                 if (transaction_object._editable) {
                     if (!transaction_object.balance.valid) return;
                     let rows = transaction_object.balance.valid_rows;
@@ -25,7 +25,13 @@ import { Account, Transaction as TransactionModel } from "./common/api.js";
                     });
                 }
                 transaction_object.editable = !transaction_object._editable;
-                edit_button.text(transaction_object._editable ? "save" : "edit");
+                $(this).text(transaction_object._editable ? "save" : "edit");
+            });
+        $(`<span class="material-symbols-outlined">delete</span>`)
+            .addClass("clickable")
+            .appendTo(transaction_object.dom).click(async () => {
+                await TransactionModel.delete(transaction_object.transaction.id);
+                $(transaction_object.dom).remove();
             });
         return transaction_object.dom;
     }));

@@ -278,6 +278,32 @@ export default (async () => {
         }
     );
 
+    router.delete('/transaction/:id', 
+        checkSchema({
+            id: {isInt: true},
+        }),
+        async (req: Request, res: Response) => {
+            let transaction = await models.Transaction.findOne({ where: { id: req.params.id } });
+
+            if (transaction == null) {
+                return res.status(404).send("Er bestaat geen transactie met dit id");
+            }
+
+            if (
+                transaction.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
+                transaction.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+            ) {
+                return res.status(400).send("Je kunt geen transactie bewerken buiten je boekjaar.");
+            }
+
+            await models.Transaction.destroy({
+                where: { id: req.params.id },
+            });
+
+            res.send();
+        }
+    );
+
     router.get('/financial-period', async (_, res) => res.send(JSON.stringify(await models.FinancialPeriod.findAll({
         order: [['start_date', 'DESC']],
     }))));
