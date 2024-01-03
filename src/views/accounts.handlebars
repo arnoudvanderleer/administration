@@ -9,7 +9,31 @@
     main {
         background-color: var(--main-bg-color);
     }
+
+    details {
+        margin-bottom: 10px;
+        padding: 5px 10px;
+    }
+
+    summary {
+        cursor: pointer;
+    }
+
+    details p {
+        margin: 0;
+        margin-top: 5px;
+    }
 </style>
+
+<details>
+    <summary>
+        Uitleg
+    </summary>
+    <p>Alle uitgaven, inkomsten, bezittingen en schulden kun je categoriseren in <i>grootboekrekeningen</i>. Bijvoorbeeld "Bankrekening", "Abonnementen", "Eten", "Nog te ontvangen tikkies" etc. Vul hieronder de eerste grootboekrekeningen in die je wilt gaan gebruiken. Merk op: dit is de enige keer dat je grootboekrekeningen met een beginwaarde kunt toevoegen (zoals bankrekeningen en schulden). Later kun je nog wel nieuwe grootboekrekeningen toevoegen, maar die beginnen dan op &euro;&nbsp;0,-.</p>
+    <p>Het nummer van een grootboekrekening is een snelle manier om aan de rekening te refereren. Ook bepaalt dit nummer de plaats waar deze in het overzicht verschijnt. De grootboeknummers 1000-1999 verschijnen als inkomsten, de grootboeknummers 2000-2999 als uitgaven, 3000-3999 als bezittingen en 4000-4999 als schulden.</p>
+    <p>De beginwaarde is de waarde die de grootboekrekening aan het begin van het boekjaar heeft. Bijvoorbeeld de hoogte van de schuld, de hoeveelheid geld die je voor een bepaald doel hebt gespaard, of de hoeveelheid geld op de bankrekening.</p>
+    <p>Vink het vakje onder "bank" aan als het specifiek om een bankrekening gaat. Dan krijgt die een aparte behandeling (zoals de mogelijkheid om een transactieoverzicht van de bank in te lezen).</p>
+</details>
 
 <table class="data">
     <thead>
@@ -30,7 +54,7 @@
             <td><input type="text" class="name" /></td>
             <td><input type="text" class="start-amount" disabled value="0.00" /></td>
             <td><input type="text" class="budget" value="0.00" /></td>
-            <td><span class="material-symbols-outlined add clickable">add</span></td>
+            <td><span class="material-symbols-outlined add clickable">save</span></td>
         </tr>
     </tfoot>
 </table>

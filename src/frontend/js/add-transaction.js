@@ -28,7 +28,7 @@ import { Transaction as TransactionModel } from "./common/api.js";
                 description: $(transaction.dom).find(".description").text(),
                 complete: true,
             });
-            transaction.editable = !transaction._editable;
+            transaction.editable = false;
             save_button.remove();
         });
 })();

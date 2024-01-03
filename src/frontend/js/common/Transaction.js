@@ -11,12 +11,22 @@ export default class Transaction {
     }
 
     set editable(editable) {
-        this._editable = editable;
+        if (!this.transaction.BankTransaction) {
+            if (this._editable) {
+                this.transaction.date = this.dom.find(".date").val();
+            }
+            this.dom.find(".date").replaceWith(editable
+                ? $(`<input type="date" class="date" />`).val(new Date(this.transaction.date).toISOString().substring(0, 10))
+                : $(`<span class="date">${render_date(this.transaction.date)}</span>`)
+            );
+        }
+
         if (this.balance) {
             this.balance.editable = editable;
         }
 
-        this.dom.find(".description").attr({contenteditable: this._editable ? "plaintext-only" : false});
+        this.dom.find(".description").attr({contenteditable: editable ? "plaintext-only" : false});
+        this._editable = editable;
     }
 
     populate() {

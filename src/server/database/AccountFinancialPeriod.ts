@@ -7,6 +7,9 @@ export default class AccountFinancialPeriod extends Model {
     declare start_amount: string;
     declare budget: string;
 
+    declare AccountId: number;
+    declare FinancialPeriodId: number;
+
     declare getAccount: BelongsToGetAssociationMixin<Account>;
     declare setAccount: BelongsToSetAssociationMixin<Account, number>;
     declare createAccount: BelongsToCreateAssociationMixin<Account>;

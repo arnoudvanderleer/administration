@@ -45,6 +45,11 @@ header nav li {
     padding: 10px;
     list-style-type: none;
 }
+
+header nav li.current {
+    background-color: var(--heading-fg-color);
+}
+
 header nav a {
     text-decoration: none;
     color: black;
@@ -80,7 +85,7 @@ input, .selectize-input, .selectize-dropdown, .selectize-input.full {
     font-family: inherit;
 }
 
-input, .selectize-input, .selectize-input.full {
+input, .selectize-input, .selectize-input.full, [contenteditable="plaintext-only"] {
     padding: 0px 10px;
     background-color: var(--main-input-color);
 }
@@ -121,4 +126,8 @@ input:disabled, .selectize-control .selectize-input.disabled {
     margin-bottom: 5px;
     padding: 15px 25px;
     background: var(--main-bg-color);
+}
+
+.transaction .description {
+    padding: 2.5px;
 }

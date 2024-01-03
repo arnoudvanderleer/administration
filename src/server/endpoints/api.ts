@@ -87,7 +87,11 @@ export default (async () => {
             results.added++;
         }
 
-        res.send(results);
+        console.log(results);
+
+        return res.writeHead(302, {
+            'Location': '/process-transactions',
+        }).send();
     });
 
     router.get("/unprocessed-transactions/:id", async (req, res) => {

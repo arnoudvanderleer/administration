@@ -161,14 +161,24 @@ export default (async () => {
     );
 
     router.delete('/account/:id', async (req, res) => {
-        let account = await models.Account.findOne({ where: { id: req.params.id }, include: models.Mutation }) as (Account & { Mutations: Mutation[] });
+        let account = await models.Account.findOne({ where: { id: req.params.id }, include: [models.Mutation] }) as (Account & { Mutations: Mutation[] });
 
         if (account == null) {
-            return res.status(404).send("No account with this id was found");
+            return res.status(404).send("Er bestaat geen rekening met dit id");
         }
 
         if (account.Mutations.length > 0) {
-            return res.status(400).send("This account still has associated mutations");
+            return res.status(400).send("Er zijn nog mutaties gelinkt aan deze rekening");
+        }
+
+        let account_financial_periods = await account.getAccountFinancialPeriods();
+
+        if (account_financial_periods.map(p => p.FinancialPeriodId != req.session.financial_period?.id).reduce((a, b) => a || b, false)) {
+            return res.status(400).send("Er zijn nog boekjaren gelinkt aan deze rekening");
+        }
+
+        for (let p of account_financial_periods) {
+            await p.destroy();
         }
 
         account.destroy();
@@ -202,6 +212,7 @@ export default (async () => {
                 return res.status(400).send(validation_result.array());
             }
             let validated_data = matchedData(req);
+            validated_data.date = new Date(validated_data.date);
 
             if (
                 validated_data.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
@@ -251,6 +262,19 @@ export default (async () => {
                 transaction.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
             ) {
                 return res.status(400).send("Je kunt geen transactie bewerken buiten je boekjaar.");
+            }
+
+            let validated_data = matchedData(req);
+            validated_data.date = new Date(validated_data.date);
+
+            if (!(await transaction.getBankTransaction())) {
+                if (
+                    validated_data.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
+                    validated_data.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+                ) {
+                    return res.status(400).send("Je kunt de datum niet buiten het boekjaar verplaatsen.");
+                }
+                transaction.date = validated_data.date;
             }
 
             let existing_mutations = await transaction.getMutations();

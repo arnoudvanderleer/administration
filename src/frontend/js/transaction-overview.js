@@ -20,6 +20,7 @@ import { Account, Transaction as TransactionModel } from "./common/api.js";
 
                     await TransactionModel.update(transaction_object.transaction.id, {
                         Mutations: mutations,
+                        date: $(transaction_object.dom).find(".date").val(),
                         description: $(transaction_object.dom).find(".description").text(),
                         complete: true,
                     });

@@ -2,20 +2,22 @@
     position: relative;
     height: 24px;
     margin-top: 5px;
+    text-align: center;
 }
 
-.transaction .postpone * {
+.transaction .postpone-block {
+    background-color: var(--heading-bg-color);
+    display: inline-block;
+    border-radius: 5px;
+    padding-left: 12px;
+}
+
+.transaction .postpone-block * {
     vertical-align: middle;
 }
 
-.transaction .postpone .material-symbols-outlined {
-    position: absolute;
-    left: calc(50% - 12px);
-}
-
 .transaction .postpone .postpone-text {
-    width: calc(50% - 12px);
-    display: inline-block;
+    max-width: 250px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

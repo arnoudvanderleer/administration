@@ -34,7 +34,12 @@ function populate_transaction(transaction) {
         .addClass("transaction-content")
         .append(transaction_object.dom.children())
         .appendTo(transaction_object.dom);
-    $('<div class="postpone clickable"><span class="postpone-text">Uitstellen</span><span class="material-symbols-outlined">expand_less</span></div>')
+    $(`<div class="postpone clickable">
+        <div class="postpone-block">
+            <span class="postpone-text">Uitstellen</span>
+            <span class="material-symbols-outlined">expand_less</span>
+        </div>
+    </div>`)
         .appendTo(transaction_object.dom)
         .click(() => set_postponed(transaction_object, !transaction_object.postponed));
     transaction_object.dom.keydown(e => {

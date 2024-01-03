@@ -69,8 +69,19 @@
                 width: 100%;
             }
 
+            details {
+                margin-bottom: 10px;
+                background-color: var(--main-bg-color);
+                padding: 5px 10px;
+            }
+
             summary {
                 cursor: pointer;
+            }
+
+            details p {
+                margin: 0;
+                margin-top: 5px;
             }
         </style>
     </head>
@@ -95,9 +106,9 @@
                             Uitleg
                         </summary>
                         <p>Alle uitgaven, inkomsten, bezittingen en schulden kun je categoriseren in <i>grootboekrekeningen</i>. Bijvoorbeeld "Bankrekening", "Abonnementen", "Eten", "Nog te ontvangen tikkies" etc. Vul hieronder de eerste grootboekrekeningen in die je wilt gaan gebruiken. Merk op: dit is de enige keer dat je grootboekrekeningen met een beginwaarde kunt toevoegen (zoals bankrekeningen en schulden). Later kun je nog wel nieuwe grootboekrekeningen toevoegen, maar die beginnen dan op &euro;&nbsp;0,-.</p>
-                        <p>Het nummer van een grootboekrekening is een snelle manier om aan de rekening te refereren. Ook bepaalt dit nummer de plaats waar deze in het overzicht verschijnt. De grootboeknummers 0-999 verschijnen als inkomsten, de grootboeknummers 1000-1999 als uitgaven, 2000-2999 als bezittingen en 3000-3999 als schulden.</p>
+                        <p>Het nummer van een grootboekrekening is een snelle manier om aan de rekening te refereren. Ook bepaalt dit nummer de plaats waar deze in het overzicht verschijnt. De grootboeknummers 1000-1999 verschijnen als inkomsten, de grootboeknummers 2000-2999 als uitgaven, 3000-3999 als bezittingen en 4000-4999 als schulden.</p>
                         <p>De beginwaarde is de waarde die de grootboekrekening aan het begin van het boekjaar heeft. Bijvoorbeeld de hoogte van de schuld, de hoeveelheid geld die je voor een bepaald doel hebt gespaard, of de hoeveelheid geld op de bankrekening.</p>
-                        <p>Vink het vakje onder "bank" aan als het om een bankrekening gaat. Dan krijgt die een aparte behandeling (zoals de mogelijkheid om een transactieoverzicht van de bank in te lezen).</p>
+                        <p>Vink het vakje onder "bank" aan als het specifiek om een bankrekening gaat. Dan krijgt die een aparte behandeling (zoals de mogelijkheid om een transactieoverzicht van de bank in te lezen).</p>
                     </details>
                     <table>
                         <thead><tr>
@@ -109,7 +120,7 @@
                         </tr></thead>
                         <tbody class="accounts-body"></tbody>
                     </table>
-                    <button class="add-account">+</button> <br />
+                    <button class="add-account" type="button">+</button> <br />
                 {{/if}}
                 <label></label><input type="submit" value="{{action}}" />
             </form>
@@ -121,12 +132,19 @@
             <td><input type="text" name="account_name" required /></td>
             <td><input type="number" name="account_number" required /></td>
             <td><input type="number" name="account_value" required /></td>
-            <td><input type="checkbox" name="account_is_bank" required /></td>
-            <td><button class="remove-line">x</button></td>
+            <td><input type="checkbox" name="account_is_bank" /></td>
+            <td><button type="button" class="remove-line">x</button></td>
         </tr>
     </template>
 
     <script>
+        document.querySelector("form").addEventListener("keydown", e => {
+            if (e.key == "Enter") {
+                e.preventDefault();
+                return false;
+            }
+        });
+
         let table_body = document.querySelector(".accounts-body");
         let template = document.querySelector(".account-row").content.firstElementChild;
 
@@ -135,13 +153,11 @@
             table_body.appendChild(node);
             node.querySelector(".remove-line").addEventListener("click", e => {
                 table_body.removeChild(node);
-                e.preventDefault();
             });
         }
 
         document.querySelector(".add-account").addEventListener("click", e => {
             add_account();
-            e.preventDefault();
         });
         add_account();
     </script>
