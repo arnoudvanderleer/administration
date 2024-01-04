@@ -74,8 +74,8 @@ export default class Balance {
             }
         }
 
-        this.dom.find(".balance-error").toggle(!totals_valid);
-        this.dom.find(".account-error").toggle(!accounts_valid);
+        this.dom.find(".balance-error").toggle(!totals_valid && this._editable);
+        this.dom.find(".account-error").toggle(!accounts_valid && this._editable);
     }
 
     add_row(row, column_index) {
