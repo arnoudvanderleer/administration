@@ -132,7 +132,7 @@
             <td><input type="text" name="account_name" required /></td>
             <td><input type="number" name="account_number" required /></td>
             <td><input type="number" name="account_value" required /></td>
-            <td><input type="checkbox" name="account_is_bank" /></td>
+            <td><input type="hidden" name="checkbox_id" /><input type="checkbox" name="account_is_bank" /></td>
             <td><button type="button" class="remove-line">x</button></td>
         </tr>
     </template>
@@ -147,6 +147,7 @@
 
         let table_body = document.querySelector(".accounts-body");
         let template = document.querySelector(".account-row").content.firstElementChild;
+        let checkbox_id = 1;
 
         function add_account() {
             let node = template.cloneNode(true);
@@ -154,6 +155,9 @@
             node.querySelector(".remove-line").addEventListener("click", e => {
                 table_body.removeChild(node);
             });
+            node.querySelector(`[name="account_is_bank"]`).name = `account_is_bank[${checkbox_id}]`;
+            node.querySelector(`[name="checkbox_id"]`).value = checkbox_id;
+            checkbox_id++;
         }
 
         document.querySelector(".add-account").addEventListener("click", e => {

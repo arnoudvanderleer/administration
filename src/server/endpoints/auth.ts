@@ -66,8 +66,8 @@ export default (async () => {
             let account_data = (req.body.account_name as string[]).map((n, i) => ({
                 name: req.body.account_name[i],
                 number: req.body.account_number[i],
-                is_bank: req.body.account_is_bank[i] == 'on',
-                value: req.body.account_value[i],
+                is_bank: req.body[`account_is_bank[${req.body.checkbox_id[i]}]`] == 'on',
+                value: ([1, 4].indexOf(Math.floor(req.body.account_number[i] / 1000)) > -1 ? (-1) : 1) * req.body.account_value[i],
             }));
 
             let new_user = await models.User.create(user_data);
