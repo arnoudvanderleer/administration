@@ -14,7 +14,8 @@ import { render_date } from "./common/common.js";
     $(`select.financial-period option[value="${current_financial_period}"]`).prop({selected: true});
 
     $("nav a").each((i, e) => {
-        if (location.href.indexOf($(e).attr("href")) >= 0) {
+        if (location.href.indexOf($(e).attr("href")) >= 0
+            || location.pathname == "/" && $(e).attr("href") == "/account-overview") {
             $(e).closest("li").addClass("current");
         }
     });
