@@ -111,6 +111,9 @@ export default (async () => {
                 return res.status(404).send("No account with this id was found");
             }
 
+            account.number = validated_data.number;
+            account.name = validated_data.name;
+
             let existing_periods = await account.getAccountFinancialPeriods({
                 where: { FinancialPeriodId: req.session.financial_period?.id },
             });
