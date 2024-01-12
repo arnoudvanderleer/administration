@@ -1,17 +1,18 @@
-import { clone_template, render } from "./common/common.js";
+import { clone_template, render, get_factor } from "./common/common.js";
 import { Account } from "./common/api.js";
 
 load();
 
 let save_new = async () => {
     let row = $("table.data tfoot tr");
+    let number = row.find(".number").val();
     let data = {
-        number : row.find(".number").val(),
+        number,
         name : row.find(".name").val(),
         AccountFinancialPeriods: [{
             FinancialPeriodId: current_financial_period,
-            start_amount: parseFloat(row.find(".start-amount").val()),
-            budget: parseFloat(row.find(".budget").val()),
+            start_amount: get_factor(number) * parseFloat(row.find(".start-amount").val()),
+            budget: get_factor(number) * parseFloat(row.find(".budget").val()),
         }],
     };
     add_row(await Account.add(data));
@@ -31,8 +32,8 @@ function add_row(account, place) {
     row.find(".enabled").prop("checked", account.AccountFinancialPeriods.length > 0);
     row.find(".number").text(account.number);
     row.find(".name").text(account.name);
-    row.find(".start-amount").text(account.AccountFinancialPeriods.length > 0 ? render(account.AccountFinancialPeriods[0].start_amount) : "");
-    row.find(".budget").text(account.AccountFinancialPeriods.length > 0 ? render(account.AccountFinancialPeriods[0].budget) : "");
+    row.find(".start-amount").text(account.AccountFinancialPeriods.length > 0 ? render(get_factor(account.number) * account.AccountFinancialPeriods[0].start_amount) : "");
+    row.find(".budget").text(account.AccountFinancialPeriods.length > 0 ? render(get_factor(account.number) * account.AccountFinancialPeriods[0].budget) : "");
     row.find(".edit").click(() => edit_row(account.id, row));
     row.find(".delete").click(async () => {
         await Account.delete(account.id);
@@ -54,13 +55,14 @@ function edit_row(id, row) {
     form_row.find(".enabled").prop("checked", row.find(".enabled").is(":checked"));
     row.replaceWith(form_row);
     let save = async () => {
+        let number = form_row.find(".number").val();
         let data = {
-            number : form_row.find(".number").val(),
+            number,
             name : form_row.find(".name").val(),
             AccountFinancialPeriods: form_row.find(".enabled").is(":checked") ? [{
                 FinancialPeriodId: current_financial_period,
-                start_amount: parseFloat(form_row.find(".start-amount").val()) || 0,
-                budget: parseFloat(form_row.find(".budget").val()) || 0,
+                start_amount: get_factor(number) * parseFloat(form_row.find(".start-amount").val()) || 0,
+                budget: get_factor(number) * parseFloat(form_row.find(".budget").val()) || 0,
             }] : []
         };
         await Account.update(id, data);

@@ -32,3 +32,8 @@ export function render(value, abs) {
 export function render_date(date) {
     return new Date(date).toDateString().substring(4);
 }
+
+export function get_factor(number) {
+    let category = Math.floor(number / 1000 - 1);
+    return ([0, 3].indexOf(category) > -1 ? (-1) : 1);
+}

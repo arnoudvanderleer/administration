@@ -1,12 +1,13 @@
 import AccountOverview from "./common/AccountOverview.js";
 import { Account } from "./common/api.js";
+import { get_factor } from "./common/common.js";
 
 (async () => {
     let categories = [[], [], [], []];
 
     for (let account of await Account.get_overview()) {
         let category = Math.floor(account.number / 1000 - 1);
-        let amount = ([0, 3].indexOf(category) > -1 ? (-1) : 1) * (parseFloat(account.AccountFinancialPeriods[0].start_amount) + (parseFloat(account.amount_sum) || 0));
+        let amount = get_factor(account.number) * (parseFloat(account.AccountFinancialPeriods[0].start_amount) + (parseFloat(account.amount_sum) || 0));
         categories[category].push({
             account,
             amount,
