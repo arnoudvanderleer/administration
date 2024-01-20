@@ -147,6 +147,34 @@ export default (async () => {
         res.send(result);
     });
 
+    router.get("/graph", async (req, res) => {
+        let result = await models.Mutation.findAll({
+            include: [
+                {
+                    model: models.Transaction,
+                    where: {
+                        date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
+                    },
+                    attributes: [],
+                },
+                {
+                    model: models.Account,
+                    attributes: [],
+                    where: {
+                        number: {[Op.between] : [3000, 4999]}
+                    }
+                }
+            ],
+            attributes: [
+                [Sequelize.col("Transaction.date"), "date"],
+                [Sequelize.fn('SUM', Sequelize.col("Mutation.amount")), 'change'],
+            ],
+            order: [Sequelize.col("Transaction.date")],
+            group: [Sequelize.col("Transaction.date")],
+        });
+        res.send(result);
+    });
+
     router.get("/backup", async (req, res) => {
         let host = 'db';
         let username = 'postgres';

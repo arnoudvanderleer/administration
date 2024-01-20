@@ -53,6 +53,10 @@ export const Account = new (class extends CrudModel {
     get_overview() {
         return CrudModel.base_get("/api/account-overview");
     }
+    
+    get_graph() {
+        return CrudModel.base_get("/api/graph");
+    }
 
     get_transactions(id) {
         return CrudModel.base_get(`/models/account/${id}/transaction`);

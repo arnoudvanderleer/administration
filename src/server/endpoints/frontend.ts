@@ -17,6 +17,8 @@ export default (async () => {
 
     router.use('/jquery', express.static('node_modules/jquery/dist'));
     router.use('/selectize', express.static('node_modules/@selectize/selectize/dist'));
+    router.use('/chart.js', express.static('node_modules/chart.js'));
+    router.use('/@kurkle', express.static('node_modules/@kurkle'));
     router.use('/', express.static('frontend'));
     return router;
 })();

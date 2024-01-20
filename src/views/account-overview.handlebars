@@ -22,10 +22,19 @@
     .balance .budget, .balance .budget-currency {
         color: var(--main-disabled-color);
     }
+
+    .graph-container {
+        height: 200px
+    }
+
 </style>
 {{/section}}
 
 <div class="content">
+    <div class="graph-container">
+        <canvas class="graph"></canvas>
+    </div>
+
     <h2>Resultaat</h2>
     <div class="balance"></div>
     <h2>Balans</h2>
@@ -39,5 +48,9 @@
 </template>
 
 {{#section 'scripts'}}
+    <script>
+        let period_start = new Date("{{session.financial_period.start_date}}");
+        let period_end = new Date("{{session.financial_period.end_date}}");
+    </script>
     <script src="/js/account-overview.js" type="module"></script>
 {{/section}}
