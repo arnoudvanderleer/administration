@@ -19,4 +19,8 @@ import { render_date } from "./common/common.js";
             $(e).closest("li").addClass("current");
         }
     });
+
+    $(".backup-banner").click(function () {
+        setTimeout(() => location.reload(), 500);
+    });
 })();
