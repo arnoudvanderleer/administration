@@ -21,6 +21,6 @@ import { render_date } from "./common/common.js";
     });
 
     $(".backup-banner").click(function () {
-        setTimeout(() => location.reload(), 500);
+        setTimeout(() => location.reload(), 1500);
     });
 })();
