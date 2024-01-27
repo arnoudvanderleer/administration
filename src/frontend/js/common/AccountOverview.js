@@ -18,29 +18,52 @@ export default class AccountOverview extends Balance {
      */
     constructor(editable, column_data) {
         super(editable, column_data);
-    }
+        this.dom = clone_template("template.account-overview");
+        this._editable = editable;
 
-    update() {
-        super.update();
+        this.rows = [[], []];
+        this.valid = false;
+        this.valid_rows = [];
+        this.invalid_rows = [];
 
-        this.dom.find(".total").removeClass("error");
+        this.column_data = column_data;
+        this.populate();
     }
 
     add_row(row, column_index) {
-        let row_object = new AccountOverviewRow(this._editable, this.column_data[column_index].edit_enabled, row.account, row.amount, row.budget);
+        let row_object = new AccountOverviewRow(this._editable, this.column_data[column_index].edit_enabled, row.account, row.graph, row.budget);
         this.dom.find(".accounts").eq(column_index).append(row_object.dom);
         this.rows[column_index].push(row_object);
-        row_object.addEventListener("update", () => this.update());
+    }
+
+    update() {
+        this.valid_rows = this.rows;
+        let totals = this.totals();
+        this.dom.find(".total").each((i, el) => {
+            $(el).find(".start-amount").text(render(totals[i][0]));
+            $(el).find(".end-amount").text(render(totals[i][1]));
+            $(el).find(".budget").text(render(totals[i][2]));
+        });
+    }
+
+    totals() {
+        return this.valid_rows.map(row_set =>
+            row_set.map(r => [
+                r.graph[0].amount,
+                r.graph[r.graph.length - 1].amount,
+                r.budget,
+            ]).reduce((a, b) => a.map((_, i) => a[i] + b[i]), [0, 0, 0])
+        );
     }
 }
 
 class AccountOverviewRow extends BalanceRow {
-    constructor(editable, edit_enabled, account, amount, budget) {
+    constructor(editable, edit_enabled, account, graph, budget) {
         super();
 
         this.edit_enabled = edit_enabled;
         this.account = account;
-        this.amount = parseFloat(amount);
+        this.graph = graph;
         this.budget = parseFloat(budget);
 
         this.dom = $("<div></div>");
@@ -57,7 +80,8 @@ class AccountOverviewRow extends BalanceRow {
         this.dom = clone_template("template.account-overview-row").replaceAll(this.dom);
 
         this.dom.find(".label").text(`${this.account.number}: ${this.account.name}`);
-        this.dom.find(".amount").text(render(this.amount));
+        this.dom.find(".start-amount").text(render(this.graph[0].amount));
+        this.dom.find(".end-amount").text(render(this.graph[this.graph.length - 1].amount));
         this.dom.find(".budget").text(render(this.budget));
     }
 

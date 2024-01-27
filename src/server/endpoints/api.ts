@@ -8,7 +8,7 @@ import connect_db from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize, literal } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
@@ -116,35 +116,54 @@ export default (async () => {
         }));
     });
 
-    router.get("/account-overview", async (req, res) => {
-        let result = await models.Account.findAll({
+    router.get("/account-overview/:id?", async (req, res) => {
+        let period_start = new Date(req.session.financial_period?.start_date ?? 0).getTime();
+        let period_end = new Date(req.session.financial_period?.end_date ?? 0).getTime();
+
+        let clip = (d : Date) => new Date(Math.max(Math.min(d.getTime(), period_end), period_start));
+
+        let from = clip(new Date((req.query.from as string) ?? period_start));
+        let to = clip(new Date((req.query.to as string) ?? period_end));
+        let before_from = new Date(from);
+        before_from.setDate(before_from.getDate() - 1);
+
+        res.send(await models.Account.findAll({
             include: [
                 {
                     model: models.Mutation,
-                    attributes: [],
+                    attributes: ["amount"],
                     include: [{
                         model: models.Transaction,
-                        attributes: [],
+                        attributes: ["date"],
                         where: {
                             complete: true,
-                            date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
+                            date: { [Op.between]: [from, to] },
                         },
-                    }]
+                    }],
                 },
                 {
+                    attributes: ["budget"],
                     model: models.AccountFinancialPeriod,
                     where: { FinancialPeriodId: req.session.financial_period?.id },
                 }
             ],
             attributes: {
-                include: [
-                    [Sequelize.fn('SUM', Sequelize.col("Mutations.amount")), 'amount_sum']
-                ]
+                include: [[
+                    literal(`COALESCE((
+                        SELECT SUM("Mutations".amount)
+                        FROM "Mutations", "Transactions"
+                        WHERE "Mutations"."TransactionId" = "Transactions".id
+                            AND "Mutations"."AccountId" = "Account".id
+                            AND "Transactions".date BETWEEN
+                                '${new Date(req.session.financial_period?.start_date ?? 0).toISOString()}'
+                                AND '${before_from.toISOString()}'
+                    ), 0) + "AccountFinancialPeriods".start_amount`),
+                    'start_amount'
+                ]]
             },
-            group: [Sequelize.col("Account.id"), Sequelize.col("AccountFinancialPeriods.id")],
-            order: [Sequelize.col("Account.number")],
-        });
-        res.send(result);
+            where: req.params.id ? {id : req.params.id} : {},
+            order: ["number"],
+        }));
     });
 
     router.get("/graph", async (req, res) => {

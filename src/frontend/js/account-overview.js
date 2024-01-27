@@ -4,79 +4,134 @@ import AccountOverview from "./common/AccountOverview.js";
 import Chart from '/chart.js/auto/auto.js';
 import { render_date } from "./common/common.js";
 
-(async () => {
-    let start_equity = fill_balances();
+let chart = null;
 
-    fill_graph(start_equity);
+(async () => {
+    $("input.from").val(period_start.toISOString().substring(0, 10));
+    $("input.to").val(period_end.toISOString().substring(0, 10));
+
+    $("input.from, input.to").change(refresh);
+
+    refresh();
 })();
 
-async function fill_balances() {
-    let categories = [[], [], [], []];
+async function refresh() {
+    let accounts = [];
 
-    for (let account of await Account.get_overview()) {
-        let category = Math.floor(account.number / 1000 - 1);
-        let amount = get_factor(account.number) * (parseFloat(account.AccountFinancialPeriods[0].start_amount) + (parseFloat(account.amount_sum) || 0));
-        categories[category].push({
+    let from = $("input.from").val();
+    let to = $("input.to").val();
+
+    let date_range = get_date_range(from, to);
+
+    for (let account of await Account.get_overview(from, to)) {
+        let factor = get_factor(account.number);
+        let start_amount = factor * parseFloat(account.start_amount);
+        let category = Math.floor(account.number / 1000) - 1;
+
+        let mutations = account.Mutations.map(m => ({
+            change: parseFloat(m.amount),
+            date: new Date(m.Transaction.date),
+        })).sort((a, b) => a.date - b.date);
+
+        let graph = [];
+
+        let total = [2, 3].indexOf(category) > -1 ? start_amount : 0;
+        let index = 0;
+        for (let current of date_range) {
+            while (index < mutations.length && mutations[index].date < current) {
+                total += factor * mutations[index].change;
+                index++;
+            }
+            graph.push({date: current.getTime(), amount: total});
+        }
+
+        accounts.push({
             account,
-            amount,
-            start_amount: parseFloat(account.AccountFinancialPeriods[0].start_amount),
+            category, 
+            graph,
             budget: account.AccountFinancialPeriods[0].budget,
         });
     }
 
-    let equity = categories[2].concat(categories[3]).map(a => a.start_amount).reduce((a, b) => a + b, 0);
+    let equity_account = { is_bank: false, id: -1, number: 4000, name: 'Eigen Vermogen' };
 
-    categories[3].splice(0, 0, {
-        account: { is_bank: false, id: -1, number: 4000, name: 'Eigen Vermogen' },
-        amount: categories[2].map(a => a.amount).concat(categories[3].map(a => -a.amount)).reduce((a, b) => a + b, 0),
+    accounts.splice(0, 0, {
+        account: equity_account,
+        category: 3,
+        graph: date_range.map((date, i) => ({
+            date,
+            amount: accounts.map(a => [2, 3].indexOf(a.category) > -1 ? get_factor(a.account.number) * a.graph[i].amount : 0)
+                .reduce((a, b) => a + b, 0)
+        })),
         budget: 0,
     });
 
-    [[
+    let tables = [[
         { header: "Debet", index: 0 },
         { header: "Credit", index: 1 },
     ], [
         { header: "Activa", index: 2 },
         { header: "Passiva", index: 3 },
-    ]].forEach((columns, i) => {
+    ]].map((columns, i) => {
         let overview = new AccountOverview(false, 
             columns.map(column => ({
                 header: column.header,
                 edit_enabled: false,
-                rows: categories[column.index],
+                rows: accounts.filter(a => a.category == column.index),
             }))
         );
-        overview.rows.forEach(column => column.forEach(row =>
+        overview.rows.reduce((a, b) => a.concat(b), []).forEach(row => {
+            if (row.account == equity_account) {
+                row.dom.find(".show-graph").prop("checked", true);
+            }
+
             row.dom.click(() => {
                 if (row.account.id < 0) return;
                 window.location.href = `/transaction-overview/${row.account.id}`
-            }
-            ).addClass("clickable")
-        ));
+            });
+        });
         $(".balance").eq(i).replaceWith(overview.dom);
+        return overview;
     });
 
-    return equity;
+    $(".balance .show-graph")
+        .change(() => show_graphs(filter_graphs(tables)))
+        .click(e => e.stopPropagation());
+
+    show_graphs(filter_graphs(tables));
 }
 
-async function fill_graph(start_equity) {
-    let data = (await Account.get_graph()).map(d => ({
-        ...d,
-        date: new Date(d.date),
-    }));
-    let end = Math.min(new Date(), period_end);
-    let graph = [];
-    let total = await start_equity;
-    let index = 0;
-    for (let current = new Date(period_start); current <= end; current.setDate(current.getDate() + 1)) {
-        if (index < data.length && data[index].date <= current) {
-            total += parseFloat(data[index].change);
-            index++;
-        }
-        graph.push({date: current.getTime(), amount: total});
+function get_date_range(from, to) {
+    let end = new Date(to);
+    end.setDate(end.getDate() + 1);
+
+    let date_range = [];
+    for (let current = new Date(from); current <= end; current.setDate(current.getDate() + 1)) {
+        date_range.push(new Date(current));
     }
+    return date_range;
+}
+
+function filter_graphs(tables) {
+    return tables.map(o => o.rows)
+        .reduce((a, b) => a.concat(b), [])
+        .reduce((a, b) => a.concat(b), [])
+        .filter(row => row.dom.find(".show-graph").is(":checked"))
+        .map(row => ({
+            name: row.account.name,
+            graph: row.graph,
+        }));
+}
+
+function show_graphs(accounts) {
     let canvas = $("canvas.graph").get(0);
-    new Chart(
+    if (chart) {
+        chart.destroy();
+    }
+    if (accounts.length == 0) {
+        return;
+    }
+    chart = new Chart(
         canvas,
         {
             type: 'line',
@@ -92,14 +147,12 @@ async function fill_graph(start_equity) {
                 },
             },
             data: {
-                labels: graph.map(row => render_date(row.date)),
-                datasets: [
-                    {
-                        label: 'Eigen vermogen',
-                        data: graph.map(row => row.amount),
-                        borderColor: "#8C694A",
-                    }
-                ]
+                labels: accounts[0].graph.map(row => render_date(row.date)),
+                datasets: accounts.map(account => ({
+                    label: account.name,
+                    data: account.graph.map(row => row.amount),
+                    // borderColor: "#8C694A",
+                })),
             },
         }
     );

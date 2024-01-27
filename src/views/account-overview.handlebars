@@ -6,16 +6,28 @@
         margin-bottom: 100px;
     }
 
+    .balance span.show-graph {
+        width: 20px;
+    }
+
     .balance .label {
-        width: 50%;
+        width: calc(40% - 20px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
-    .balance .currency, .balance .budget-currency {
-        width: 10%;
+    .balance .row > *, .balance .total > * {
+        padding: 0;
     }
 
-    .balance .amount, .balance .budget {
-        width: 15%;
+    .balance .currency {
+        width: 20px;
+        text-align: center;
+    }
+
+    .balance .start-amount, .balance .end-amount, .balance .budget {
+        width: calc(20% - 20px);
         text-align: right;
     }
 
@@ -34,6 +46,8 @@
     <div class="graph-container">
         <canvas class="graph"></canvas>
     </div>
+    <input type="date" class="from" />
+    <input type="date" class="to" />
 
     <h2>Resultaat</h2>
     <div class="balance"></div>
@@ -41,9 +55,22 @@
     <div class="balance"></div>
 </div>
 
+<template class="account-overview">
+    <div class="balance">
+        <div class="balance-body">
+            <span class="header left"></span>
+            <span class="header right"></span>
+            <div class="accounts left"></div>
+            <div class="accounts right"></div>
+            <div class="total left"><span class="show-graph"></span><span class="label">Totaal: </span><span class="currency">&euro;</span><span class="start-amount"></span><span class="currency">&euro;</span><span class="end-amount"></span><span class="currency">&euro;</span><span class="budget"></span></div>
+            <div class="total right"><span class="show-graph"></span><span class="label">Totaal: </span><span class="currency">&euro;</span><span class="start-amount"></span><span class="currency">&euro;</span><span class="end-amount"></span><span class="currency">&euro;</span><span class="budget"></span></div>
+        </div>
+    </div>
+</template>
+
 <template class="account-overview-row">
-    <span class="row">
-        <span class="label"></span><span class="currency">&euro;</span><span class="amount"></span><span class="budget-currency">&euro;</span><span class="budget"></span>
+    <span class="row clickable">
+        <span class="show-graph"><input type="checkbox" class="show-graph" /></span><span class="label"></span><span class="currency">&euro;</span><span class="start-amount"></span><span class="currency">&euro;</span><span class="end-amount"></span><span class="currency">&euro;</span><span class="budget"></span>
     </span>
 </template>
 

@@ -50,8 +50,8 @@ class CrudModel {
 }
 
 export const Account = new (class extends CrudModel {
-    get_overview() {
-        return CrudModel.base_get("/api/account-overview");
+    get_overview(from, to) {
+        return CrudModel.base_get(`/api/account-overview?from=${from}&to=${to}`);
     }
     
     get_graph() {
