@@ -18,6 +18,10 @@ let chart = null;
 async function refresh() {
     let accounts = [];
 
+    if (!$("input.from").get(0).reportValidity() || !$("input.to").get(0).reportValidity()) {
+        return;
+    }
+
     let from = $("input.from").val();
     let to = $("input.to").val();
 
