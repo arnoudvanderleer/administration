@@ -8,7 +8,7 @@ let chart = null;
 
 (async () => {
     $("input.from").val(period_start.toISOString().substring(0, 10));
-    $("input.to").val(period_end.toISOString().substring(0, 10));
+    $("input.to").val(new Date(Math.min(period_end, new Date())).toISOString().substring(0, 10));
 
     $("input.from, input.to").change(refresh);
 
