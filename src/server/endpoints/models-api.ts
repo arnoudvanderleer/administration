@@ -5,7 +5,7 @@ import connect_db from '../database/database';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
 
-import { Transaction, Op, FindOptions, IncludeOptions } from 'sequelize';
+import { Transaction, Op, FindOptions, IncludeOptions, col } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
@@ -49,7 +49,7 @@ export default (async () => {
     });
 
     const transaction_query: ((start: Date | undefined, end: Date | undefined) => IncludeOptions) = (start, end) => ({
-        order: [['date', 'ASC']],
+        order: [['date', 'DESC']],
         where: {
             complete: true,
             date: { [Op.between]: [start, end] },
@@ -203,6 +203,7 @@ export default (async () => {
                     model: models.Transaction,
                 }
             ],
+            order: [[col("Transaction.date"), "DESC"]],
             attributes: [],
         })).map(m => (m as Mutation & { Transaction: Transaction }).Transaction)
     ));

@@ -155,7 +155,6 @@ function show_graphs(accounts) {
                 datasets: accounts.map(account => ({
                     label: account.name,
                     data: account.graph.map(row => row.amount),
-                    // borderColor: "#8C694A",
                 })),
             },
         }
