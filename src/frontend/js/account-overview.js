@@ -7,13 +7,28 @@ import { render_date } from "./common/common.js";
 let chart = null;
 
 (async () => {
-    $("input.from").val(period_start.toISOString().substring(0, 10));
-    $("input.to").val(new Date(Math.min(period_end, new Date())).toISOString().substring(0, 10));
+    set_interval(period_start, new Date(Math.min(period_end, new Date())));
 
     $("input.from, input.to").change(refresh);
 
+    $("button.last-month").click(() => {
+        let date = new Date();
+        set_interval(new Date(date.getFullYear(), date.getMonth() - 1, 1, 12, -date.getTimezoneOffset()), new Date(date.getFullYear(), date.getMonth(), 0, 12, -date.getTimezoneOffset()));
+    });
+
+    $("button.this-month").click(() => {
+        let date = new Date();
+        set_interval(new Date(date.getFullYear(), date.getMonth(), 1, 12, -date.getTimezoneOffset()), new Date(date.getFullYear(), date.getMonth() + 1, 0, 12, -date.getTimezoneOffset()));
+    });
+
     refresh();
 })();
+
+function set_interval(start, end) { 
+    console.log(start, start.toISOString(), end);
+    $("input.from").val(start.toISOString().substring(0, 10));
+    $("input.to").val(end.toISOString().substring(0, 10)).change();
+}
 
 async function refresh() {
     let accounts = [];
