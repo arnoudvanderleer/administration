@@ -65,12 +65,16 @@ header nav a {
     color: var(--heading-bg-color);
 }
 
-.clickable {
-    cursor: pointer;
+button, button.material-symbols-outlined {
+    font-size: 13px;
+    height: 22px;
+    vertical-align: middle;
 }
 
-.material-symbols-outlined {
+.material-symbols-outlined.clickable {
+    cursor: pointer;
     background-color: var(--heading-bg-color);
+    vertical-align: middle;
     border-radius: 5px;
 }
 

@@ -7,22 +7,35 @@ import { render_date } from "./common/common.js";
 let chart = null;
 
 (async () => {
-    set_interval(period_start, new Date(Math.min(period_end, new Date())));
+    $("button.reset-date").click(() => {
+        set_interval(period_start, new Date(Math.min(period_end, new Date())));
+    }).click();
 
     $("input.from, input.to").change(refresh);
 
-    $("button.last-month").click(() => {
-        let date = new Date();
-        set_interval(new Date(date.getFullYear(), date.getMonth() - 1, 1, 12, -date.getTimezoneOffset()), new Date(date.getFullYear(), date.getMonth(), 0, 12, -date.getTimezoneOffset()));
+    $("button.previous-month").click(() => {
+        let date = new Date($("input.from").val());
+        set_month(new Date(date.getFullYear(), date.getMonth() - 1));
     });
 
     $("button.this-month").click(() => {
-        let date = new Date();
-        set_interval(new Date(date.getFullYear(), date.getMonth(), 1, 12, -date.getTimezoneOffset()), new Date(date.getFullYear(), date.getMonth() + 1, 0, 12, -date.getTimezoneOffset()));
+        set_month(new Date());
+    });
+
+    $("button.next-month").click(() => {
+        let date = new Date($("input.from").val());
+        set_month(new Date(date.getFullYear(), date.getMonth() + 1));
     });
 
     refresh();
 })();
+
+function set_month(date) {
+    set_interval(
+        new Date(date.getFullYear(), date.getMonth(), 1, 12, -date.getTimezoneOffset()),
+        new Date(date.getFullYear(), date.getMonth() + 1, 0, 12, -date.getTimezoneOffset()),
+    );
+}
 
 function set_interval(start, end) { 
     console.log(start, start.toISOString(), end);
