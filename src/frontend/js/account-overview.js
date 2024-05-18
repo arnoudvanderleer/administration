@@ -2,14 +2,14 @@ import { Account } from "./common/api.js";
 import { get_factor } from "./common/common.js";
 import AccountOverview from "./common/AccountOverview.js";
 import Chart from '/chart.js/auto/auto.js';
-import { render_date } from "./common/common.js";
+import { render_date, save_hash, load_hash } from "./common/common.js";
 
 let chart = null;
 
 (async () => {
     $("button.reset-date").click(() => {
         set_interval(period_start, new Date(Math.min(period_end, new Date())));
-    }).click();
+    });
 
     $("input.from, input.to").change(refresh);
 
@@ -27,20 +27,35 @@ let chart = null;
         set_month(new Date(date.getFullYear(), date.getMonth() + 1));
     });
 
-    refresh();
+    let interval = load_hash();
+    console.log(interval);
+    if ("from" in interval && "to" in interval) {
+        set_interval(interval.from, interval.to);
+    } else {
+        $("button.reset-date").click();
+    }
 })();
 
 function set_month(date) {
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
     set_interval(
         new Date(date.getFullYear(), date.getMonth(), 1, 12, -date.getTimezoneOffset()),
         new Date(date.getFullYear(), date.getMonth() + 1, 0, 12, -date.getTimezoneOffset()),
     );
 }
 
-function set_interval(start, end) { 
-    console.log(start, start.toISOString(), end);
-    $("input.from").val(start.toISOString().substring(0, 10));
-    $("input.to").val(end.toISOString().substring(0, 10)).change();
+function set_interval(from, to) { 
+    if (!(from instanceof Date)) {
+        from = new Date(from);
+    }
+    if (!(to instanceof Date)) {
+        to = new Date(to);
+    }
+    $("input.from").val(from.toISOString().substring(0, 10));
+    $("input.to").val(to.toISOString().substring(0, 10)).change();
+    save_hash({from, to});
 }
 
 async function refresh() {

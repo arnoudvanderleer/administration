@@ -37,3 +37,16 @@ export function get_factor(number) {
     let category = Math.floor(number / 1000 - 1);
     return ([0, 3].indexOf(category) > -1 ? (-1) : 1);
 }
+
+export function save_hash(data) {
+    window.location.hash = btoa(JSON.stringify(data));
+}
+
+export function load_hash() {
+    try {
+        return JSON.parse(atob(window.location.hash.substring(1)));
+    }
+    catch {
+        return {};
+    }
+}
