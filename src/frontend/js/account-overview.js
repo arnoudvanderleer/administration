@@ -6,6 +6,8 @@ import { render_date, save_hash, load_hash } from "./common/common.js";
 
 let chart = null;
 
+let state = load_hash();
+
 (async () => {
     $("button.reset-date").click(() => {
         set_interval(period_start, new Date(Math.min(period_end, new Date())));
@@ -27,10 +29,8 @@ let chart = null;
         set_month(new Date(date.getFullYear(), date.getMonth() + 1));
     });
 
-    let interval = load_hash();
-    console.log(interval);
-    if ("from" in interval && "to" in interval) {
-        set_interval(interval.from, interval.to);
+    if ("from" in (state.interval ?? {}) && "to" in (state.interval ?? {})) {
+        set_interval(state.interval.from, state.interval.to);
     } else {
         $("button.reset-date").click();
     }
@@ -55,7 +55,8 @@ function set_interval(from, to) {
     }
     $("input.from").val(from.toISOString().substring(0, 10));
     $("input.to").val(to.toISOString().substring(0, 10)).change();
-    save_hash({from, to});
+    state.interval = {from, to};
+    save_hash(state);
 }
 
 async function refresh() {
@@ -113,6 +114,13 @@ async function refresh() {
         budget: 0,
     });
 
+    if (!("accounts" in state)) {
+        state.accounts = Object.fromEntries(
+            accounts.map(a => [a.account.number, a.account == equity_account])
+        );
+        save_hash(state);
+    }
+
     let tables = [[
         { header: "Debet", index: 0 },
         { header: "Credit", index: 1 },
@@ -128,7 +136,7 @@ async function refresh() {
             }))
         );
         overview.rows.reduce((a, b) => a.concat(b), []).forEach(row => {
-            if (row.account == equity_account) {
+            if (state.accounts[row.account.number]) {
                 row.dom.find(".show-graph").prop("checked", true);
             }
 
@@ -160,10 +168,14 @@ function get_date_range(from, to) {
 }
 
 function filter_graphs(tables) {
-    return tables.map(o => o.rows)
-        .reduce((a, b) => a.concat(b), [])
-        .reduce((a, b) => a.concat(b), [])
-        .filter(row => row.dom.find(".show-graph").is(":checked"))
+    let rows = tables.map(o => o.rows)
+            .reduce((a, b) => a.concat(b), [])
+            .reduce((a, b) => a.concat(b), []);
+
+    state.accounts = Object.fromEntries(rows.map(row => [row.account.number, row.dom.find(".show-graph").is(":checked")]));
+    save_hash(state);
+
+    return rows.filter(row => state.accounts[row.account.number])
         .map(row => ({
             name: row.account.name,
             graph: row.graph,
