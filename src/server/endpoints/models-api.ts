@@ -189,24 +189,56 @@ export default (async () => {
         res.status(200).send();
     });
 
-    router.get('/transaction', async (req, res) => res.send(await models.Transaction.findAll(transaction_query(req.session.financial_period?.start_date, req.session.financial_period?.end_date))));
+    router.get('/transaction', async (req, res) => {
+        let start = new Date(req.session.financial_period?.start_date as Date);
+        if (req.query.from) {
+            let new_start = new Date(req.query.from as string);
+            if (new_start > start) {
+                start = new_start;
+            }
+        }
+        let end = new Date(req.session.financial_period?.end_date as Date);
+        if (req.query.to) {
+            let new_end = new Date(req.query.to as string);
+            if (new_end < end) {
+                end = new_end;
+            }
+        }
+        res.send(await models.Transaction.findAll(transaction_query(start, end)));
+    });
 
-    router.get('/account/:id/transaction', async (req, res) => res.send(
-        (await models.Mutation.findAll({
-            include: [
-                {
-                    model: models.Account,
-                    where: { id: req.params.id },
-                    attributes: [],
-                }, {
-                    ...transaction_query(req.session.financial_period?.start_date, req.session.financial_period?.end_date),
-                    model: models.Transaction,
-                }
-            ],
-            order: [[col("Transaction.date"), "DESC"]],
-            attributes: [],
-        })).map(m => (m as Mutation & { Transaction: Transaction }).Transaction)
-    ));
+    router.get('/account/:id/transaction', async (req, res) => {
+        let start = new Date(req.session.financial_period?.start_date as Date);
+        if (req.query.from) {
+            let new_start = new Date(req.query.from as string);
+            if (new_start > start) {
+                start = new_start;
+            }
+        }
+        let end = new Date(req.session.financial_period?.end_date as Date);
+        if (req.query.to) {
+            let new_end = new Date(req.query.to as string);
+            if (new_end < end) {
+                end = new_end;
+            }
+        }
+        res.send(
+            (await models.Mutation.findAll({
+                include: [
+                    {
+                        model: models.Account,
+                        where: { id: req.params.id },
+                        attributes: [],
+                    }, {
+                        ...transaction_query(start, end),
+                        model: models.Transaction,
+                    }
+                ],
+                order: [[col("Transaction.date"), "DESC"]],
+                attributes: [],
+            })).map(m => (m as Mutation & { Transaction: Transaction }).Transaction)
+        );
+    });
 
     router.post('/transaction',
         checkSchema(schemas.transaction),

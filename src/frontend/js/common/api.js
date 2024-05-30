@@ -7,8 +7,8 @@ class CrudModel {
         return $.getJSON(url);
     }
 
-    get_all() {
-        return CrudModel.base_get(this.base_url);
+    get_all(from = null, to = null) {
+        return CrudModel.base_get(`${this.base_url}${this.generate_query({from, to})}`);
     }
 
     static base_add(url, data) {
@@ -47,6 +47,18 @@ class CrudModel {
     delete(id) {
         return CrudModel.base_delete(this.base_url + id);
     }
+
+    generate_query (params) {
+        let verified_params = {};
+        let exists = false;
+        for (let [key, value] of Object.entries(params)) {
+            if (value) {
+                verified_params[key] = value;
+                exists = true;
+            }
+        }
+        return exists ? "?" + new URLSearchParams(verified_params) : "";
+    }
 }
 
 export const Account = new (class extends CrudModel {
@@ -58,8 +70,8 @@ export const Account = new (class extends CrudModel {
         return CrudModel.base_get("/api/graph");
     }
 
-    get_transactions(id) {
-        return CrudModel.base_get(`/models/account/${id}/transaction`);
+    get_transactions(id, from = null, to = null) {
+        return CrudModel.base_get(`/models/account/${id}/transaction${this.generate_query({from, to})}`);
     }
 })("/models/account/");
 

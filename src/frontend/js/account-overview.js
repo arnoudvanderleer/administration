@@ -13,7 +13,14 @@ let state = load_hash();
         set_interval(period_start, new Date(Math.min(period_end, new Date())));
     });
 
-    $("input.from, input.to").change(refresh);
+    $("input.from, input.to").change(() => {
+        state.interval = {
+            from: $("input.from").val(),
+            to: $("input.to").val(),
+        };
+        save_hash(state);
+        refresh();
+    });
 
     $("button.previous-month").click(() => {
         let date = new Date($("input.from").val());
@@ -66,12 +73,9 @@ async function refresh() {
         return;
     }
 
-    let from = $("input.from").val();
-    let to = $("input.to").val();
+    let date_range = get_date_range(state.interval.from, state.interval.to);
 
-    let date_range = get_date_range(from, to);
-
-    for (let account of await Account.get_overview(from, to)) {
+    for (let account of await Account.get_overview(state.interval.from, state.interval.to)) {
         let factor = get_factor(account.number);
         let start_amount = factor * parseFloat(account.start_amount);
         let category = Math.floor(account.number / 1000) - 1;
@@ -141,8 +145,11 @@ async function refresh() {
             }
 
             row.dom.click(() => {
-                if (row.account.id < 0) return;
-                window.location.href = `/transaction-overview/${row.account.id}`
+                if (row.account.id < 0) {
+                    window.location.href = `/transaction-overview/#${btoa(JSON.stringify(state.interval))}`;
+                } else {
+                    window.location.href = `/transaction-overview/${row.account.id}/#${btoa(JSON.stringify(state.interval))}`;
+                }
             });
         });
         $(".balance").eq(i).replaceWith(overview.dom);
@@ -177,6 +184,7 @@ function filter_graphs(tables) {
 
     return rows.filter(row => state.accounts[row.account.number])
         .map(row => ({
+            id: row.account.id,
             name: row.account.name,
             graph: row.graph,
         }));
@@ -204,6 +212,26 @@ function show_graphs(accounts) {
                         },
                     },
                 },
+                onClick: (e, a) => {
+                    if (a.length == 0) return;
+
+                    let point = a[0];
+                    let account = accounts[point.datasetIndex];
+                    let moment = account.graph[point.index];
+
+                    let from = new Date(moment.date);
+                    from.setDate(from.getDate() - 1);
+                    let to = new Date(moment.date);
+                    to.setDate(to.getDate());
+
+                    let interval = { from, to };
+
+                    if (account.id < 0) {
+                        window.location = `/transaction-overview/#${btoa(JSON.stringify(interval))}`;
+                    } else {
+                        window.location = `/transaction-overview/${account.id}/#${btoa(JSON.stringify(interval))}`;
+                    }
+                }
             },
             data: {
                 labels: accounts[0].graph.map(row => render_date(row.date)),

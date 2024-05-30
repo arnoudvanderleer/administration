@@ -1,8 +1,16 @@
 import Transaction from "./common/Transaction.js";
+import { load_hash } from "./common/common.js";
 import { Account, Transaction as TransactionModel } from "./common/api.js";
 
 (async () => {
-    let transactions = id ? await Account.get_transactions(id) : await TransactionModel.get_all();
+    let interval = load_hash();
+
+    let transactions = [];
+    if (id) {
+        transactions = await Account.get_transactions(id, interval.from, interval.to);
+    } else {
+        transactions = await TransactionModel.get_all(interval.from, interval.to);
+    }
 
     $(".content").append(transactions.map(t => {
         let transaction_object = new Transaction(t, false);
