@@ -1,6 +1,9 @@
 FROM node:latest as base
 
-RUN apt-get update && apt-get -y install postgresql
+RUN apt-get update
+RUN apt-get -y install postgresql-common
+RUN echo | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+RUN apt-get -y install postgresql-client-17
 
 WORKDIR /home/node/app
 
