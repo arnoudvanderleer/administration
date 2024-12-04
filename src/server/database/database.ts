@@ -1,4 +1,6 @@
 import { Sequelize } from 'sequelize';
+import util from 'util';
+import { exec } from 'child_process';
 
 import Account, {init as initAccount} from "./Account";
 import BankTransaction, {init as initBankTransaction} from "./BankTransaction";
@@ -8,9 +10,19 @@ import Mutation, {init as initMutation} from "./Mutation";
 import Transaction, {init as initTransaction} from "./Transaction";
 import User, {init as initUser} from "./User";
 
+const exec_promise = util.promisify(exec);
+
+const credentials = {
+    host: 'db',
+    username: 'postgres',
+    password: 'accountant',
+    database: 'postgres',
+    port: 5432,
+};
+
 export default (async () => {
-    const sequelize = new Sequelize('postgres', 'postgres', 'accountant', {
-        host: 'db',
+    const sequelize = new Sequelize(credentials.database, credentials.username, credentials.password, {
+        host: credentials.host,
         dialect: 'postgres',
     });
 
@@ -68,3 +80,28 @@ export default (async () => {
         User,
     };
 })();
+
+const pg_flags = [
+        ['username', credentials.username],
+        ['host', credentials.host],
+        ['port', credentials.port],
+        ['format', 't'],
+    ]
+    .map(([name, value]) => `--${name}="${value}"`)
+    .join(" ");
+
+export async function dump() {
+    let name = `./backup-${new Date().getTime()}.tar.gz`;
+
+    let command = `PGPASSWORD="${credentials.password}" pg_dump ${pg_flags} "${credentials.database}" | gzip > "${name}"`;
+
+    await exec_promise(command);
+
+    return name;
+}
+
+export async function restore(name: string) {
+    let command = `gunzip -c "${name}" | PGPASSWORD="${credentials.password}" pg_restore ${pg_flags} --clean --dbname "${credentials.database}"`;
+
+    return exec_promise(command);
+}

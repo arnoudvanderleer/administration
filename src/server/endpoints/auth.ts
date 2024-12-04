@@ -1,6 +1,8 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import connect_db from '../database/database';
+import connect_db, { restore } from '../database/database';
+import tmp from 'tmp-promise';
+import fs from 'fs';
 
 import crypto from 'crypto';
 
@@ -35,7 +37,6 @@ export default (async () => {
             layout: null,
             first,
             action: first ? "Registreren" : "Inloggen",
-            title: first ? "Gebruiker aanmaken" : "Inloggen",
         };
         res.render("login", params);
     });
@@ -109,6 +110,37 @@ export default (async () => {
         return res.writeHead(302, {
             'Location': '/auth',
         }).send();
+    });
+
+    router.post("/restore-backup", async (req, res) => {
+        if (await models.User.count() > 0) {
+            return res.send("I am sorry, you cannot restore a backup on an existing installation.");
+        }
+
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).send('No files were uploaded.');
+        }
+
+        let file = req.files.backup;
+
+        if (Array.isArray(file)) {
+            file = file[0];
+        }
+
+        let tmp_file = await tmp.file();
+
+        let stream = fs.createWriteStream(tmp_file.path);
+        stream.write(file.data);
+        stream.close();
+
+        try {
+            await restore(tmp_file.path);
+        } catch (e) {
+            console.log(e);
+            return res.send("Something went wrong.");
+        }
+
+        return res.send("Backup restored successfully. Please return to the previous page to log in.");
     });
 
     return router;

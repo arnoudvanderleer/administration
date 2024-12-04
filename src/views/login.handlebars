@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>{{title}}</title>
+        <title>{{action}}</title>
         <style>
             html {
                 --heading-bg-color: #8C694A;
@@ -87,12 +87,21 @@
     </head>
     <body>
         <main>
-            <h1>{{title}}</h1>
-            <form method="post" action="/auth">
+            <h1>{{action}}</h1>
+            {{#if first}}
+                <p>Welkom bij het administratiesysteem. Je kunt nu kiezen om een oude backup te herstellen, of om een nieuwe gebruiker, een nieuw boekjaar en nieuwe grootboekrekeningen aan te maken.</p>
+                <h2>Backup Herstellen</h2>
+                <form method="POST" action="/auth/restore-backup" enctype="multipart/form-data">
+                    <label>Backup:</label><input type="file" name="backup" />
+                    <label></label><input type="submit" value="Herstellen" />
+                </form>
+                <h2>Gebruiker aanmaken</h2>
+            {{/if}}
+            <form method="POST" action="/auth">
                 <label>Gebruikersnaam:</label><input type="text" name="username" minlength="4" required />
                 <label>Wachtwoord:</label><input type="password" name="password" minlength="12" required />
                 {{#if first}}
-                    <h2>Boekjaar</h2>
+                    <h3>Boekjaar</h2>
                     <details>
                         <summary>
                             Uitleg
@@ -100,7 +109,7 @@
                         <p>De boekhouding is georganiseerd in <i>boekjaren</i>. Iedere transactie valt in een boekjaar, en zolang een boekjaar bezig is, kun de transacties van dat boekjaar wijzigen. Aan het einde sluit je een boekjaar, waarmee je zorgt dat de transacties niet meer gewijzigd, maar alleen nog bekeken kunnen worden. Wat zijn de begin- en einddatum van het eerste boekjaar?</p>
                     </details>
                     <label class="date">Vanaf: </label><input type="date" name="financial_period" required /><label class="date">&nbsp;Tot: </label><input type="date" name="financial_period" required />
-                    <h2>Grootboekrekeningen</h2>
+                    <h3>Grootboekrekeningen</h2>
                     <details>
                         <summary>
                             Uitleg

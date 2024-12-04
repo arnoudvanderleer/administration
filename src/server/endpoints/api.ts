@@ -1,10 +1,8 @@
 import express from 'express';
 import { parse } from 'csv-parse';
-import util from 'util';
-import { exec } from 'child_process';
-import fs from 'fs';
+import fs from 'fs/promises';
 
-import connect_db from '../database/database';
+import connect_db, { dump } from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
@@ -12,8 +10,6 @@ import { Op, Sequelize, literal } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
 
 const router = express.Router();
-
-const exec_promise = util.promisify(exec);
 
 export default (async () => {
     const models = await connect_db;
@@ -195,18 +191,10 @@ export default (async () => {
     });
 
     router.get("/backup", async (req, res) => {
-        let host = 'db';
-        let username = 'postgres';
-        let password = 'accountant';
-        let database = 'postgres';
-        let port = 5432;
+        let name = await dump();
 
-        let name = `./backup-${new Date().getTime()}.tar.gz`;
-
-        let command = `PGPASSWORD="${password}" pg_dump -U "${username}" -h "${host}" -p ${port} -F t "${database}" | gzip > "${name}"`;
-        await exec_promise(command);
         res.download(name, async e => {
-            await util.promisify(fs.unlink)(name);
+            await fs.unlink(name);
 
             let user = await models.User.findByPk(req.session.user_id ?? 0);
             if (user) {
