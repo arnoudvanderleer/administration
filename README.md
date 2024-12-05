@@ -4,9 +4,6 @@
 * Maybe attach mutations to account-financial period combinations
 * Periodical transactions
 * Compound transactions (for creditors and debtors)
-* Backups
 <!-- * Accounts -->
 * HTTPS?
 * Add a place to close a financial period, and start a new one. Should only be able if there are no unprocessed transactions.
-
-* Add the option of selecting a period for the transaction and account overview.
