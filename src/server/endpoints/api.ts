@@ -126,8 +126,7 @@ export default (async () => {
                     JOIN "Transactions" AS T ON M."TransactionId" = T.id
                     JOIN "FinancialPeriods" AS FP ON FP.id = $period_id
                 WHERE
-                    FP.start_date <= T.date
-                    AND T.date < $date
+                    T.date BETWEEN FP.start_date AND $date
                     AND T.complete = TRUE
             )
             SELECT
