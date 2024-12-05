@@ -6,8 +6,9 @@ import connect_db, { dump } from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
-import { Op, Sequelize, literal } from 'sequelize';
+import { Op, QueryTypes, Sequelize, literal } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
+import * as util from '../util';
 
 const router = express.Router();
 
@@ -113,81 +114,99 @@ export default (async () => {
     });
 
     router.get("/account-overview/:id?", async (req, res) => {
-        let period_start = new Date(req.session.financial_period?.start_date ?? 0).getTime();
-        let period_end = new Date(req.session.financial_period?.end_date ?? 0).getTime();
+        let date = util.clip_period(req, (req.query.date as string) ?? util.period_end(req));
 
-        let clip = (d : Date) => new Date(Math.max(Math.min(d.getTime(), period_end), period_start));
+        let query =
+            `WITH mutation_data AS (
+                SELECT
+                    M."AccountId",
+                    M.amount
+                FROM
+                    "Mutations" AS M
+                    JOIN "Transactions" AS T ON M."TransactionId" = T.id
+                    JOIN "FinancialPeriods" AS FP ON FP.id = $period_id
+                WHERE
+                    FP.start_date <= T.date
+                    AND T.date < $date
+                    AND T.complete = TRUE
+            )
+            SELECT
+                A.id,
+                A.number,
+                A.name,
+                A.is_bank,
+                AFP.budget,
+                AFP.start_amount + SUM(COALESCE(M.amount, 0)) AS amount
+            FROM
+                "Accounts" AS A
+                JOIN "AccountFinancialPeriods" AS AFP ON AFP."AccountId" = A.id
+                    AND AFP."FinancialPeriodId" = $period_id
+                LEFT JOIN mutation_data M ON M."AccountId" = A.id
+            GROUP BY
+                A.id,
+                AFP.id
+            ORDER BY
+                A.number ASC;`;
 
-        let from = clip(new Date((req.query.from as string) ?? period_start));
-        let to = clip(new Date((req.query.to as string) ?? period_end));
-        let before_from = new Date(from);
-        before_from.setDate(before_from.getDate() - 1);
-
-        res.send(await models.Account.findAll({
-            include: [
-                {
-                    model: models.Mutation,
-                    attributes: ["amount"],
-                    include: [{
-                        model: models.Transaction,
-                        attributes: ["date"],
-                        where: {
-                            complete: true,
-                            date: { [Op.between]: [from, to] },
-                        },
-                    }],
+        try {
+            let result = await models.sequelize.query(query, {
+                bind: {
+                    date,
+                    period_id: req.session.financial_period?.id,
                 },
-                {
-                    attributes: ["budget"],
-                    model: models.AccountFinancialPeriod,
-                    where: { FinancialPeriodId: req.session.financial_period?.id },
-                }
-            ],
-            attributes: {
-                include: [[
-                    literal(`COALESCE((
-                        SELECT SUM("Mutations".amount)
-                        FROM "Mutations", "Transactions"
-                        WHERE "Mutations"."TransactionId" = "Transactions".id
-                            AND "Mutations"."AccountId" = "Account".id
-                            AND "Transactions".date BETWEEN
-                                '${new Date(req.session.financial_period?.start_date ?? 0).toISOString()}'
-                                AND '${before_from.toISOString()}'
-                    ), 0) + "AccountFinancialPeriods".start_amount`),
-                    'start_amount'
-                ]]
-            },
-            where: req.params.id ? {id : req.params.id} : {},
-            order: ["number"],
-        }));
+                type: QueryTypes.SELECT,
+            });
+
+            res.send(result);
+        } catch (e) {
+            res.send("Something went terribly wrong.");
+        }
     });
 
-    router.get("/graph", async (req, res) => {
-        let result = await models.Mutation.findAll({
-            include: [
-                {
-                    model: models.Transaction,
-                    where: {
-                        date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
-                    },
-                    attributes: [],
+    router.get("/graph/:id", async (req, res) => {
+        let from = util.clip_period(req, (req.query.from as string) ?? util.period_start(req));
+        let to = util.clip_period(req, (req.query.to as string) ?? util.period_end(req));
+
+        let account_part = `AND M."AccountId" = $account_id`;
+        let factor = `1`;
+
+        if (req.params.id == "-1") {
+            account_part = ``;
+            factor = `(CASE WHEN A.number / 1000 - 1 < 2 THEN 0 ELSE -1 END)`;
+        }
+
+        let query =
+            `SELECT
+                T.date,
+                SUM(M.amount * ${factor}) AS amount
+            FROM
+                "Mutations" AS M
+                JOIN "Transactions" AS T
+                    ON M."TransactionId" = T.id
+                JOIN "Accounts" AS A
+                    ON M."AccountId" = A.id
+            WHERE
+                T.complete = TRUE
+                ${account_part}
+                And T.date BETWEEN $from AND $to
+            GROUP BY T.date
+            ORDER BY date ASC;`;
+
+        try {
+            let result = await models.sequelize.query(query, {
+                bind: {
+                    account_id: req.params.id,
+                    period_id: req.session.financial_period?.id,
+                    from,
+                    to,
                 },
-                {
-                    model: models.Account,
-                    attributes: [],
-                    where: {
-                        number: {[Op.between] : [3000, 4999]}
-                    }
-                }
-            ],
-            attributes: [
-                [Sequelize.col("Transaction.date"), "date"],
-                [Sequelize.fn('SUM', Sequelize.col("Mutation.amount")), 'change'],
-            ],
-            order: [Sequelize.col("Transaction.date")],
-            group: [Sequelize.col("Transaction.date")],
-        });
-        res.send(result);
+                type: QueryTypes.SELECT,
+            });
+
+            res.send(result);
+        } catch (e) {
+            res.send("Something went terribly wrong.");
+        }
     });
 
     router.get("/backup", async (req, res) => {

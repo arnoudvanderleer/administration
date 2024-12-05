@@ -62,12 +62,12 @@ class CrudModel {
 }
 
 export const Account = new (class extends CrudModel {
-    get_overview(from, to) {
-        return CrudModel.base_get(`/api/account-overview?from=${from}&to=${to}`);
+    get_overview(date) {
+        return CrudModel.base_get(`/api/account-overview?date=${date}`);
     }
-    
-    get_graph() {
-        return CrudModel.base_get("/api/graph");
+
+    get_graph(id, from, to) {
+        return CrudModel.base_get(`/api/graph/${id}?from=${from}&to=${to}`);
     }
 
     get_transactions(id, from = null, to = null) {

@@ -16,10 +16,9 @@ export default class AccountOverview extends Balance {
      *      }[]
      * } [] } column_data
      */
-    constructor(editable, column_data) {
-        super(editable, column_data);
+    constructor(column_data) {
+        super(false, column_data);
         this.dom = clone_template("template.account-overview");
-        this._editable = editable;
 
         this.rows = [[], []];
         this.valid = false;
@@ -31,7 +30,7 @@ export default class AccountOverview extends Balance {
     }
 
     add_row(row, column_index) {
-        let row_object = new AccountOverviewRow(this._editable, this.column_data[column_index].edit_enabled, row.account, row.graph, row.budget);
+        let row_object = new AccountOverviewRow(row);
         this.dom.find(".accounts").eq(column_index).append(row_object.dom);
         this.rows[column_index].push(row_object);
     }
@@ -49,40 +48,25 @@ export default class AccountOverview extends Balance {
     totals() {
         return this.valid_rows.map(row_set =>
             row_set.map(r => [
-                r.graph[0].amount,
-                r.graph[r.graph.length - 1].amount,
-                r.budget,
+                r.account.start_amount,
+                r.account.end_amount,
+                r.account.budget,
             ]).reduce((a, b) => a.map((_, i) => a[i] + b[i]), [0, 0, 0])
         );
     }
 }
 
 class AccountOverviewRow extends BalanceRow {
-    constructor(editable, edit_enabled, account, graph, budget) {
+    constructor(account) {
         super();
 
-        this.edit_enabled = edit_enabled;
         this.account = account;
-        this.graph = graph;
-        this.budget = parseFloat(budget);
-
-        this.dom = $("<div></div>");
-        this.editable = editable;
-    }
-    
-    /**
-     * @param {boolean} editable
-     */
-    set editable(editable) {
-        if (editable == this._editable) return;
-        this._editable = editable;
 
         this.dom = clone_template("template.account-overview-row").replaceAll(this.dom);
-
         this.dom.find(".label").text(`${this.account.number}: ${this.account.name}`);
-        this.dom.find(".start-amount").text(render(this.graph[0].amount));
-        this.dom.find(".end-amount").text(render(this.graph[this.graph.length - 1].amount));
-        this.dom.find(".budget").text(render(this.budget));
+        this.dom.find(".start-amount").text(render(this.account.start_amount));
+        this.dom.find(".end-amount").text(render(this.account.end_amount));
+        this.dom.find(".budget").text(render(this.account.budget));
     }
 
     is_valid() {

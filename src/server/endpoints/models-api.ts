@@ -7,6 +7,7 @@ import Account from '../database/Account';
 
 import { Transaction, Op, FindOptions, IncludeOptions, col } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
+import * as util from '../util';
 
 const router = express.Router();
 
@@ -128,7 +129,7 @@ export default (async () => {
                             model: models.Transaction,
                             where: {
                                 date: {
-                                    [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date]
+                                    [Op.between]: [util.period_start(req), util.period_end(req)]
                                 }
                             }
                         }
@@ -190,14 +191,14 @@ export default (async () => {
     });
 
     router.get('/transaction', async (req, res) => {
-        let start = new Date(req.session.financial_period?.start_date as Date);
+        let start = new Date(util.period_start(req));
         if (req.query.from) {
             let new_start = new Date(req.query.from as string);
             if (new_start > start) {
                 start = new_start;
             }
         }
-        let end = new Date(req.session.financial_period?.end_date as Date);
+        let end = new Date(util.period_end(req));
         if (req.query.to) {
             let new_end = new Date(req.query.to as string);
             if (new_end < end) {
@@ -208,14 +209,14 @@ export default (async () => {
     });
 
     router.get('/account/:id/transaction', async (req, res) => {
-        let start = new Date(req.session.financial_period?.start_date as Date);
+        let start = new Date(util.period_start(req));
         if (req.query.from) {
             let new_start = new Date(req.query.from as string);
             if (new_start > start) {
                 start = new_start;
             }
         }
-        let end = new Date(req.session.financial_period?.end_date as Date);
+        let end = new Date(util.period_end(req));
         if (req.query.to) {
             let new_end = new Date(req.query.to as string);
             if (new_end < end) {
@@ -251,8 +252,8 @@ export default (async () => {
             validated_data.date = new Date(validated_data.date);
 
             if (
-                validated_data.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
-                validated_data.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+                validated_data.date < new Date(util.period_start(req)) ||
+                validated_data.date > new Date(util.period_end(req))
             ) {
                 return res.status(400).send("Je kunt geen transactie aanmaken buiten je boekjaar.");
             }
@@ -273,7 +274,7 @@ export default (async () => {
             }
 
             res.send(await models.Transaction.findOne({
-                ...transaction_query(req.session.financial_period?.start_date, req.session.financial_period?.end_date),
+                ...transaction_query(new Date(util.period_start(req)), new Date(util.period_end(req))),
                 where: {
                     id: transaction.id,
                 },
@@ -294,8 +295,8 @@ export default (async () => {
             }
 
             if (
-                transaction.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
-                transaction.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+                transaction.date < new Date(util.period_start(req)) ||
+                transaction.date > new Date(util.period_end(req))
             ) {
                 return res.status(400).send("Je kunt geen transactie bewerken buiten je boekjaar.");
             }
@@ -305,8 +306,8 @@ export default (async () => {
 
             if (!(await transaction.getBankTransaction())) {
                 if (
-                    validated_data.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
-                    validated_data.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+                    validated_data.date < new Date(util.period_start(req)) ||
+                    validated_data.date > new Date(util.period_end(req))
                 ) {
                     return res.status(400).send("Je kunt de datum niet buiten het boekjaar verplaatsen.");
                 }
@@ -350,8 +351,8 @@ export default (async () => {
             }
 
             if (
-                transaction.date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
-                transaction.date > new Date((req.session.financial_period as FinancialPeriod).end_date)
+                transaction.date < new Date(util.period_start(req)) ||
+                transaction.date > new Date(util.period_end(req))
             ) {
                 return res.status(400).send("Je kunt geen transactie bewerken buiten je boekjaar.");
             }

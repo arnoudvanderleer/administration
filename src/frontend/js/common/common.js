@@ -38,8 +38,12 @@ export function get_factor(number) {
     return ([0, 3].indexOf(category) > -1 ? (-1) : 1);
 }
 
+export function make_hash(data) {
+    return btoa(JSON.stringify(data));
+}
+
 export function save_hash(data) {
-    window.location.hash = btoa(JSON.stringify(data));
+    window.location.hash = make_hash(data);
 }
 
 export function load_hash() {
