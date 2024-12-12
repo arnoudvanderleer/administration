@@ -113,12 +113,12 @@ async function refresh() {
 }
 
 async function fetch_accounts() {
-    let begin_date = new Date(state.interval.from);
-    begin_date.setDate(begin_date.getDate() - 1);
+    let end_date = new Date(state.interval.to);
+    end_date.setDate(end_date.getDate() + 1);
     
     let [account_data, end_amounts] = await Promise.all([
-        Account.get_overview(begin_date.toISOString().substring(0, 10)),
-        Account.get_overview(state.interval.to)
+        Account.get_overview(state.interval.from),
+        Account.get_overview(end_date.toISOString().substring(0, 10))
             .then(end_amounts => Object.fromEntries(
                 end_amounts.map(account => [account.id, account.amount])
             )),

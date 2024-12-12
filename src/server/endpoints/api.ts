@@ -114,7 +114,7 @@ export default (async () => {
     });
 
     router.get("/account-overview/:id?", async (req, res) => {
-        let date = util.clip_period(req, (req.query.date as string) ?? util.period_end(req));
+        let date = (req.query.date as string) ?? util.period_end(req);
 
         let query =
             `WITH mutation_data AS (
@@ -126,7 +126,8 @@ export default (async () => {
                     JOIN "Transactions" AS T ON M."TransactionId" = T.id
                     JOIN "FinancialPeriods" AS FP ON FP.id = $period_id
                 WHERE
-                    T.date BETWEEN FP.start_date AND $date
+                    T.date BETWEEN FP.start_date AND FP.end_date
+                    AND T.date < $date
                     AND T.complete = TRUE
             )
             SELECT
