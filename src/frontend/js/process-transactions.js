@@ -30,6 +30,12 @@ async function show_transactions(id) {
 function populate_transaction(transaction) {
     let transaction_object = new Transaction(transaction, true);
     transaction_object.postponed = false;
+    $(`<span class="material-symbols-outlined">delete</span>`)
+        .addClass("clickable")
+        .appendTo(transaction_object.dom).click(async () => {
+            await TransactionModel.delete(transaction_object.transaction.id);
+            $(transaction_object.dom).remove();
+        });
     $("<div></div>")
         .addClass("transaction-content")
         .append(transaction_object.dom.children())
