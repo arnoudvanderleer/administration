@@ -1,0 +1,30 @@
+{{#section 'title'}}Boekjaar sluiten{{/section}}
+
+{{#section 'style'}}
+    <style>
+        .messages {
+            margin: 25px;
+        }
+
+        .messages p {
+            margin: 0;
+        }
+    </style>
+{{/section}}
+
+<div class="content">
+    <p>Controleer eerst zelf of alle boekhouding goed is verwerkt.</p>
+    <p>Controleer nu het volgende:</p>
+
+    <div class="messages"></div>
+
+    <div class="form">
+        <p>Het nieuwe boekjaar loopt van <input type="date" class="start-date" disabled /> tot en met <input type="date" class="end-date" /></p>
+
+        <button class="close-financial-period">Sluit het oude boekjaar en maak een nieuw boekjaar aan</button>
+    </form>
+</div>
+
+{{#section 'scripts'}}
+<script type="module" src="/js/close-financial-period.js"></script>
+{{/section}}

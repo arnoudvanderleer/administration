@@ -1,7 +1,8 @@
-import { Sequelize, DataTypes, Model, HasManyGetAssociationsMixin, HasManyCreateAssociationMixin, HasManyCountAssociationsMixin, HasManyHasAssociationMixin, HasManyHasAssociationsMixin, HasManySetAssociationsMixin, HasManyAddAssociationMixin, HasManyAddAssociationsMixin, HasManyRemoveAssociationMixin, HasManyRemoveAssociationsMixin, HasOneCreateAssociationMixin, HasOneSetAssociationMixin, HasOneGetAssociationMixin } from 'sequelize';
+import { Sequelize, DataTypes, Model, HasManyGetAssociationsMixin, HasManyCreateAssociationMixin, HasManyCountAssociationsMixin, HasManyHasAssociationMixin, HasManyHasAssociationsMixin, HasManySetAssociationsMixin, HasManyAddAssociationMixin, HasManyAddAssociationsMixin, HasManyRemoveAssociationMixin, HasManyRemoveAssociationsMixin, HasOneCreateAssociationMixin, HasOneSetAssociationMixin, HasOneGetAssociationMixin, Op } from 'sequelize';
 
 import Mutation from './Mutation';
 import BankTransaction from './BankTransaction';
+import Account from './Account';
 
 export default class Transaction extends Model {
     declare id: number;
@@ -23,6 +24,21 @@ export default class Transaction extends Model {
     declare getBankTransaction: HasOneGetAssociationMixin<BankTransaction>;
     declare createBankTransaction: HasOneCreateAssociationMixin<BankTransaction>;
     declare setBankTransaction: HasOneSetAssociationMixin<BankTransaction, number>;
+
+    static unprocessed = (id : number) => Transaction.findAll({
+        where: {
+            complete: false,
+        },
+        order: [['date', 'ASC']],
+        include: [
+            BankTransaction,
+            {
+                model: Mutation,
+                include: [Account],
+                where: { AccountId: id },
+            },
+        ],
+    });
 };
 
 export function init(sequelize: Sequelize) {

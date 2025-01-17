@@ -6,9 +6,10 @@ import connect_db, { dump } from '../database/database';
 import BankTransaction from '../database/BankTransaction';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
-import { Op, QueryTypes, Sequelize, literal } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
 import * as util from '../util';
+import AccountFinancialPeriod from 'database/AccountFinancialPeriod';
 
 const router = express.Router();
 
@@ -92,73 +93,21 @@ export default (async () => {
     });
 
     router.get("/unprocessed-transactions/:id", async (req, res) => {
-        if (!req.session.financial_period?.current) {
+        if (!(req.session.financial_period as FinancialPeriod).current) {
             return res.status(400).send("Je kunt geen wijzigingen meer doen in dit boekjaar.");
         }
 
-        res.send(await models.Transaction.findAll({
-            where: {
-                complete: false,
-                date: { [Op.between]: [req.session.financial_period?.start_date, req.session.financial_period?.end_date] },
-            },
-            order: [['date', 'ASC']],
-            include: [
-                BankTransaction,
-                {
-                    model: Mutation,
-                    include: [Account],
-                    where: { AccountId: req.params.id },
-                },
-            ],
-        }));
+        res.send(await models.Transaction.unprocessed(parseInt(req.params.id)));
     });
 
     router.get("/account-overview/:id?", async (req, res) => {
-        let date = (req.query.date as string) ?? util.period_end(req);
-
-        let query =
-            `WITH mutation_data AS (
-                SELECT
-                    M."AccountId",
-                    M.amount
-                FROM
-                    "Mutations" AS M
-                    JOIN "Transactions" AS T ON M."TransactionId" = T.id
-                    JOIN "FinancialPeriods" AS FP ON FP.id = $period_id
-                WHERE
-                    T.date BETWEEN FP.start_date AND FP.end_date
-                    AND T.date < $date
-                    AND T.complete = TRUE
-            )
-            SELECT
-                A.id,
-                A.number,
-                A.name,
-                A.is_bank,
-                AFP.budget,
-                AFP.start_amount + SUM(COALESCE(M.amount, 0)) AS amount
-            FROM
-                "Accounts" AS A
-                JOIN "AccountFinancialPeriods" AS AFP ON AFP."AccountId" = A.id
-                    AND AFP."FinancialPeriodId" = $period_id
-                LEFT JOIN mutation_data M ON M."AccountId" = A.id
-            GROUP BY
-                A.id,
-                AFP.id
-            ORDER BY
-                A.number ASC;`;
-
         try {
-            let result = await models.sequelize.query(query, {
-                bind: {
-                    date,
-                    period_id: req.session.financial_period?.id,
-                },
-                type: QueryTypes.SELECT,
-            });
-
-            res.send(result);
+            res.send(await models.Account.overview(
+                (req.session.financial_period as FinancialPeriod).id,
+                (req.query.date as string) ?? util.period_end(req)
+            ));
         } catch (e) {
+            console.log(e);
             res.send("Something went terribly wrong.");
         }
     });
@@ -196,7 +145,7 @@ export default (async () => {
             let result = await models.sequelize.query(query, {
                 bind: {
                     account_id: req.params.id,
-                    period_id: req.session.financial_period?.id,
+                    period_id: (req.session.financial_period as FinancialPeriod).id,
                     from,
                     to,
                 },
@@ -205,6 +154,7 @@ export default (async () => {
 
             res.send(result);
         } catch (e) {
+            console.log(e);
             res.send("Something went terribly wrong.");
         }
     });
@@ -221,6 +171,106 @@ export default (async () => {
                 await user.save();
             }
         });
+    });
+
+    router.post("/close-financial-period", async (req, res) => {
+        let financial_period_id = (req.session.financial_period as FinancialPeriod).id;
+
+        let confirm = (req.query.confirm ?? 'false') == '';
+
+        let messages = [];
+
+        if (!(req.session.financial_period as FinancialPeriod).current) {
+            messages.push({
+                success: false,
+                text: "Dit boekjaar is al gesloten.",
+            });
+        }
+
+        let new_start = new Date(new Date((req.session.financial_period as FinancialPeriod).end_date).getTime() + 24 * 60 * 60 * 1000);
+
+        if (new Date() < new_start) {
+            messages.push({
+                success: false,
+                text: "Het boekjaar is nog niet afgelopen.",
+            });
+        }
+
+        let accounts = await models.Account.overview(financial_period_id, new_start.toISOString().substring(0, 10));
+
+        if (accounts == undefined) {
+            return res.send("The accounts could not be fetched");
+        }
+
+        let bank_account_transactions = await Promise.all(accounts.filter(a => a.is_bank).map(a =>
+            models.Transaction.unprocessed(a.id).then(u => ({
+                number: a.number,
+                name: a.name,
+                count: u.length
+            }))
+        ));
+        
+        for (let t of bank_account_transactions) {
+            if (t.count > 0) {
+                messages.push({
+                    success: false,
+                    text: `Er zijn nog onverwerkte transacties op grootboekrekening ${t.number}: ${t.name}`,
+                });
+            }
+        }
+
+        let success = messages.map(m => m.success).reduce((a, b) => a && b, true);
+
+        if (confirm && !success) {
+            return res.send(messages);
+        }
+
+        let new_period : (FinancialPeriod | null) = null;
+
+        if (confirm) {
+            try {
+                new_period = await models.FinancialPeriod.create({
+                    current: true,
+                    start_date: new_start,
+                    end_date: req.body.end_date,
+                });
+            } catch (e) {
+                console.log(e);
+                return res.send(`Something went terribly wrong`);
+            }
+
+            req.session.financial_period = new_period;
+
+            let period = (await models.FinancialPeriod.findByPk(financial_period_id) as FinancialPeriod);
+            period.current = false;
+            await period.save();
+
+            messages.push({
+                success: true,
+                text: `Het nieuwe boekjaar loopt van ${new_period.start_date.toDateString().substring(4)} tot en met ${new_period.end_date.toDateString().substring(4)}.`
+            });
+        }
+
+        await Promise.all(accounts.map(async a => {
+            let category = Math.floor(a.number / 1000 - 1);
+            let factor = ([0, 3].indexOf(category) > -1 ? (-1) : 1);
+            let is_result = [0, 1].indexOf(category) > -1;
+            messages.push({
+                success: true,
+                text: `${a.number}: ${a.name} ${is_result ? 'gaat terug naar 0' : 'blijft op ' + (factor * parseFloat(a.amount)).toFixed(2)}`,
+            });
+
+            if (confirm) {
+                return await models.AccountFinancialPeriod.create({
+                    start_amount: is_result ? 0 : a.amount,
+                    budget: a.budget,
+                    AccountId: a.id,
+                    FinancialPeriodId: (new_period as FinancialPeriod).id,
+                });
+            }
+        }));
+
+        res.send(messages);
     });
 
     return router;

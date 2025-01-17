@@ -3,15 +3,16 @@ import connect_db from '../database/database';
 var router = express.Router();
 
 export default (async () => {
-    router.get('/',                         async (req, res) => res.render("account-overview",      await make_handlebars_data(req)));
-    router.get('/account-overview',         async (req, res) => res.render("account-overview",      await make_handlebars_data(req)));
-    router.get('/accounts',                 async (req, res) => res.render("accounts",              await make_handlebars_data(req)));
-    router.get('/financial-periods',        async (req, res) => res.render("financial-periods",     await make_handlebars_data(req)));
-    router.get('/process-transactions',     async (req, res) => res.render("process-transactions",  await make_handlebars_data(req)));
-    router.get('/add-transaction',          async (req, res) => res.render("add-transaction",       await make_handlebars_data(req)));
-    router.get('/upload-transactions',      async (req, res) => res.render("upload-transactions",   await make_handlebars_data(req)));
-    router.get('/transaction-overview',     async (req, res) => res.render("transaction-overview",  await make_handlebars_data(req)));
-    router.get('/transaction-overview/:id', async (req, res) => res.render("transaction-overview",  await make_handlebars_data(req, {id : req.params.id})));
+    router.get('/',                         async (req, res) => res.render("account-overview",          await make_handlebars_data(req)));
+    router.get('/account-overview',         async (req, res) => res.render("account-overview",          await make_handlebars_data(req)));
+    router.get('/accounts',                 async (req, res) => res.render("accounts",                  await make_handlebars_data(req)));
+    router.get('/financial-periods',        async (req, res) => res.render("financial-periods",         await make_handlebars_data(req)));
+    router.get('/close-financial-period',   async (req, res) => res.render("close-financial-period",    await make_handlebars_data(req)));
+    router.get('/process-transactions',     async (req, res) => res.render("process-transactions",      await make_handlebars_data(req)));
+    router.get('/add-transaction',          async (req, res) => res.render("add-transaction",           await make_handlebars_data(req)));
+    router.get('/upload-transactions',      async (req, res) => res.render("upload-transactions",       await make_handlebars_data(req)));
+    router.get('/transaction-overview',     async (req, res) => res.render("transaction-overview",      await make_handlebars_data(req)));
+    router.get('/transaction-overview/:id', async (req, res) => res.render("transaction-overview",      await make_handlebars_data(req, {id : req.params.id})));
 
     router.get('/period', (req, res) => res.send(JSON.stringify(req.session.financial_period)));
 

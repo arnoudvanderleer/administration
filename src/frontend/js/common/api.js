@@ -79,6 +79,10 @@ export const FinancialPeriod = new (class extends CrudModel {
     set_period(id) {
         return CrudModel.base_update('/api/financial-period', {id});
     }
+
+    close(confirm, end_date) {
+        return CrudModel.base_add('/api/close-financial-period' + (confirm ? '?confirm' : ''), {end_date});
+    }
 })("/models/financial-period/");
 
 export const Transaction = new (class extends CrudModel {
