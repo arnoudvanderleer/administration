@@ -129,7 +129,7 @@
                         </tr></thead>
                         <tbody class="accounts-body"></tbody>
                     </table>
-                    <button class="add-account" type="button">+</button> <br />
+                    <button class="add-account">+</button> <br />
                 {{/if}}
                 <label></label><input type="submit" value="{{action}}" />
             </form>
@@ -142,7 +142,7 @@
             <td><input type="number" min="1000" max="4999" name="account_number" required /></td>
             <td><input type="number" step="0.01" name="account_value" required /></td>
             <td><input type="hidden" name="checkbox_id" /><input type="checkbox" name="account_is_bank" /></td>
-            <td><button type="button" class="remove-line">x</button></td>
+            <td><button class="remove-line">x</button></td>
         </tr>
     </template>
 
