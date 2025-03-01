@@ -4,6 +4,7 @@ import { Schema, checkSchema, matchedData, validationResult } from 'express-vali
 import connect_db from '../database/database';
 import Mutation from '../database/Mutation';
 import Account from '../database/Account';
+import PlannedMutation from '../database/PlannedMutation';
 
 import { Transaction, Op, FindOptions, IncludeOptions, col } from 'sequelize';
 import FinancialPeriod from 'database/FinancialPeriod';
@@ -25,6 +26,18 @@ const schemas : {[key: string]: Schema} = {
         date: {isDate: true},
         complete: {isBoolean: true},
         Mutations: {
+            isArray: true,
+            isEmpty: false
+        },
+        'Mutations.*.AccountId': {isInt: true},
+        'Mutations.*.amount': {isDecimal: true},
+    },
+    planned_transaction: {
+        description: {exists: true},
+        nextDate: {isDate: true},
+        period: {exists: true},
+        periodUnit: {exists: true},
+        PlannedMutations: {
             isArray: true,
             isEmpty: false
         },
@@ -357,9 +370,108 @@ export default (async () => {
                 return res.status(400).send("Je kunt geen transactie bewerken buiten je boekjaar.");
             }
 
-            await models.Transaction.destroy({
-                where: { id: req.params.id },
+            await transaction.destroy();
+
+            res.send();
+        }
+    );
+
+    router.get('/planned-transaction', async (req, res) => {
+        res.send(await models.PlannedTransaction.findAll({
+            order: [['nextDate', 'ASC']],
+            include: {
+                model: PlannedMutation,
+                include: [Account],
+            },
+        }));
+    });
+
+    router.post('/planned-transaction',
+        checkSchema(schemas.planned_transaction),
+        async (req: Request, res: Response) => {
+            let validation_result = validationResult(req);
+            if (!validation_result.isEmpty()) {
+                return res.status(400).send(validation_result.array());
+            }
+            let validated_data = matchedData(req);
+
+            let transaction = await models.PlannedTransaction.create({
+                nextDate: new Date(validated_data.nextDate),
+                description: validated_data.description,
+                period: validated_data.period,
+                periodUnit: validated_data.periodUnit,
             });
+
+            for (let m of (validated_data.PlannedMutations as { AccountId: number, amount: string }[])) {
+                let mutation = await transaction.createPlannedMutation({ amount: m.amount });
+                try {
+                    await mutation.setAccount(m.AccountId);
+                } catch (e) {
+                    return res.status(400).send(`An error occurred when trying to make a mutation at account ${m.AccountId}: ${e}`);
+                }
+            }
+
+            res.send(await models.PlannedTransaction.findOne({
+                include: {
+                    model: PlannedMutation,
+                    include: [Account],
+                },
+                where: {
+                    id: transaction.id,
+                },
+            }));
+        }
+    );
+
+    router.put('/planned-transaction/:id', 
+        checkSchema({
+            ...schemas.planned_transaction,
+            id: {isInt: true},
+        }),
+        async (req: Request, res: Response) => {
+            let transaction = await models.PlannedTransaction.findOne({ where: { id: req.params.id } });
+
+            if (transaction == null) {
+                return res.status(404).send("Er bestaat geen transactie met dit id");
+            }
+
+            let validated_data = matchedData(req);
+
+            transaction.description = validated_data.description;
+            transaction.nextDate = new Date(validated_data.nextDate);
+            transaction.period = validated_data.period;
+            transaction.periodUnit = validated_data.periodUnit;
+
+            let existing_mutations = await transaction.getPlannedMutations();
+            await Promise.all(existing_mutations.map(m => m.destroy()));
+
+            for (let m of (req.body.PlannedMutations as { AccountId: number, amount: string }[])) {
+                let mutation = await transaction.createPlannedMutation({ amount: m.amount });
+                try {
+                    await mutation.setAccount(m.AccountId);
+                } catch (e) {
+                    return res.status(400).send(`An error occurred when trying to make a mutation at account ${m.AccountId}: ${e}`);
+                }
+            }
+
+            transaction.save();
+
+            res.send(transaction);
+        }
+    );
+
+    router.delete('/planned-transaction/:id', 
+        checkSchema({
+            id: {isInt: true},
+        }),
+        async (req: Request, res: Response) => {
+            let transaction = await models.PlannedTransaction.findOne({ where: { id: req.params.id } });
+
+            if (transaction == null) {
+                return res.status(404).send("Er bestaat geen transactie met dit id");
+            }
+
+            await transaction.destroy();
 
             res.send();
         }

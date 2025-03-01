@@ -25,12 +25,12 @@
             <li><a href="/process-transactions">Verwerk transacties</a></li>
             <li><a href="/add-transaction">Transactie toevoegen</a></li>
             <li><a href="/transaction-overview">Transactieoverzicht</a></li>
+            <li><a href="/planned-transactions">Ingeplande Transacties</a></li>
         </nav>
         <h2>Beheren</h2>
         <nav>
             <li><a href="/accounts">Beheer grootboekrekeningen</a></li>
             <li><a href="/close-financial-period">Boekjaar sluiten</a></li>
-            {{!-- <li><a href="/financial-periods">Beheer boekjaren</a></li> --}}
         </nav>
         <h2>Account</h2>
         <nav>
@@ -86,6 +86,13 @@
         <div class="transaction">
             <p><span class="date"></span>: <span class="description"></span></p>
             <span class="bank-transaction"></span>
+        </div>
+    </template>
+
+    <template class="planned-transaction">
+        <div class="transaction">
+            <p>Op <span class="date"></span>: <span class="description"></span></p>
+            <p>Herhaalt iedere <span class="period"></span> <span class="period-unit"></span></p>
         </div>
     </template>
 

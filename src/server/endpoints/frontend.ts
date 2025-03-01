@@ -13,6 +13,7 @@ export default (async () => {
     router.get('/upload-transactions',      async (req, res) => res.render("upload-transactions",       await make_handlebars_data(req)));
     router.get('/transaction-overview',     async (req, res) => res.render("transaction-overview",      await make_handlebars_data(req)));
     router.get('/transaction-overview/:id', async (req, res) => res.render("transaction-overview",      await make_handlebars_data(req, {id : req.params.id})));
+    router.get('/planned-transactions',     async (req, res) => res.render("planned-transactions",      await make_handlebars_data(req)));
     router.get('/add-planned-transaction',  async (req, res) => res.render("add-planned-transaction",   await make_handlebars_data(req)));
 
     router.get('/period', (req, res) => res.send(JSON.stringify(req.session.financial_period)));

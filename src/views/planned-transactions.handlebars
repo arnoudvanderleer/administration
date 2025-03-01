@@ -1,0 +1,21 @@
+{{#section 'title'}}Ingeplande Transacties{{/section}}
+
+{{#section 'style'}}
+<style>
+    a.add-planned-transaction {
+        background-color: var(--heading-bg-color);
+        text-decoration: none;
+        color: black;
+        display: inline-block;
+        padding: 5px;
+        border-radius: 5px;
+    }
+</style>
+{{/section}}
+
+{{#section 'scripts'}}
+<script src="/js/planned-transactions.js" type="module"></script>
+{{/section}}
+
+<a class="add-planned-transaction" href="/add-planned-transaction">Transactie Inplannen</a>
+<div class="content"></div>

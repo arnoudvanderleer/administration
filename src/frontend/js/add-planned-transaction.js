@@ -6,11 +6,11 @@ import { PlannedTransaction as PlannedTransactionModel } from "./common/api.js";
     date.setDate(date.getDate() + 1);
 
     let transaction = new PlannedTransaction({
-        date: date.toISOString().substring(0, 10),
+        nextDate: date.toISOString().substring(0, 10),
         period: 1,
         periodUnit: "month",
         description: "Omschrijving",
-        Mutations: [],
+        PlannedMutations: [],
     }, true);
 
     $(".transactions").append(transaction.dom);
@@ -27,7 +27,7 @@ import { PlannedTransaction as PlannedTransactionModel } from "./common/api.js";
             }))).reduce((a, b) => a.concat(b), []);
 
             await PlannedTransactionModel.add({
-                Mutations: mutations,
+                PlannedMutations: mutations,
                 description: $(transaction.dom).find(".description").text(),
                 nextDate: $(transaction.dom).find(".date").val(),
                 period: $(transaction.dom).find(".period").val(),
