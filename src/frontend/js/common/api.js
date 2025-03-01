@@ -90,3 +90,5 @@ export const Transaction = new (class extends CrudModel {
         return CrudModel.base_get(`/api/unprocessed-transactions/${id}`);
     }
 })("/models/transaction/");
+
+export const PlannedTransaction = new CrudModel("/models/planned-transaction/");
