@@ -8,6 +8,8 @@ import FinancialPeriod, {init as initFinancialPeriod} from './FinancialPeriod';
 import AccountFinancialPeriod, {init as initAccountFinancialPeriod} from './AccountFinancialPeriod';
 import Mutation, {init as initMutation} from "./Mutation";
 import Transaction, {init as initTransaction} from "./Transaction";
+import PlannedMutation, {init as initPlannedMutation} from "./PlannedMutation";
+import PlannedTransaction, {init as initPlannedTransaction} from "./PlannedTransaction";
 import User, {init as initUser} from "./User";
 
 const exec_promise = util.promisify(exec);
@@ -40,6 +42,8 @@ export default (async () => {
     initAccountFinancialPeriod(sequelize);
     initMutation(sequelize);
     initTransaction(sequelize);
+    initPlannedMutation(sequelize);
+    initPlannedTransaction(sequelize);
     initUser(sequelize);
 
     Account.hasMany(AccountFinancialPeriod, {
@@ -67,6 +71,16 @@ export default (async () => {
     });
     Mutation.belongsTo(Transaction);
 
+    Account.hasMany(PlannedMutation, {
+        onDelete: 'RESTRICT',
+    });
+    PlannedMutation.belongsTo(Account);
+
+    PlannedTransaction.hasMany(PlannedMutation, {
+        onDelete: 'CASCADE',
+    });
+    PlannedMutation.belongsTo(PlannedTransaction);
+
     sequelize.sync();
 
     return {
@@ -77,6 +91,8 @@ export default (async () => {
         AccountFinancialPeriod,
         Mutation,
         Transaction,
+        PlannedMutation,
+        PlannedTransaction,
         User,
     };
 })();
