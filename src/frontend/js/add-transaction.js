@@ -9,7 +9,6 @@ import { Transaction as TransactionModel } from "./common/api.js";
     }, true);
 
     $(".transactions").append(transaction.dom);
-    $(transaction.dom).find(".date").replaceWith(`<input type="date" class="date" value="${transaction.transaction.date}" />`);
 
     let save_button = $(`<span class="material-symbols-outlined">save</span>`)
         .addClass("clickable")
