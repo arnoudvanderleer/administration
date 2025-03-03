@@ -13,12 +13,16 @@ import models_api from './endpoints/models-api';
 import auth from './endpoints/auth';
 import bodyParser from 'body-parser';
 
+import start_daemons from './daemons';
+
 declare module 'express-session' {
   export interface SessionData {
     financial_period: FinancialPeriod;
     user_id : number;
   }
 }
+
+start_daemons();
 
 const app = express();
 
