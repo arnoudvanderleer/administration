@@ -7,7 +7,6 @@ import Account from '../database/Account';
 import PlannedMutation from '../database/PlannedMutation';
 
 import { Transaction, Op, FindOptions, IncludeOptions, col } from 'sequelize';
-import FinancialPeriod from 'database/FinancialPeriod';
 import * as util from '../util';
 
 const router = express.Router();
