@@ -2,6 +2,7 @@ import { Op, Transaction } from 'sequelize';
 import connect_db from './database/database';
 import PlannedMutation from './database/PlannedMutation';
 import PlannedTransaction from 'database/PlannedTransaction';
+import Account from './database/Account';
 
 async function process_planned_transactions () {
     console.log("Process planned transactions");
@@ -36,10 +37,12 @@ async function process_planned_transactions () {
             complete: true,
         });
 
-        for (let m of t.PlannedMutations) {
-            let new_mutation = await new_transaction.createMutation({amount: m.amount});
-            await new_mutation.setAccount(await m.getAccount());
-        }
+        await Promise.all(t.PlannedMutations.map(m => 
+            new_transaction.createMutation({
+                amount: m.amount,
+                AccountId: m.AccountId,
+            })
+        ));
 
         console.log("Create transaction", new_transaction.get({plain: true}));
 
@@ -65,7 +68,7 @@ async function process_planned_transactions () {
     }
 }
 
-const daemons = [
+let daemons = [
     {daemon: process_planned_transactions, time: 1000 * 3600 * 12},
 ];
 

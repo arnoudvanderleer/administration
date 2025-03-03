@@ -7,6 +7,7 @@ import PlannedTransaction from "./PlannedTransaction";
 export default class PlannedMutation extends Model {
     declare id: number;
     declare amount: number;
+    declare AccountId: number;
 
     declare getAccount: BelongsToGetAssociationMixin<Account>;
     declare setAccount: BelongsToSetAssociationMixin<Account, number>;
