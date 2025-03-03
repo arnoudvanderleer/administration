@@ -49,22 +49,22 @@ async function process_planned_transactions () {
         if (t.period <= 0) {
             await t.destroy();
             continue;
-        } else {
-            let new_date = new Date(t.nextDate);
-            switch (t.periodUnit) {
-                case "day":
-                    new_date.setDate(new_date.getDate() + t.period);
-                    break;
-                case "week":
-                    new_date.setDate(new_date.getDate() + t.period * 7);
-                    break;
-                case "month":
-                    new_date.setMonth(new_date.getMonth() + t.period);
-                    break;
-            }
-            t.nextDate = new_date;
-            t.save();
         }
+
+        let new_date = new Date(t.nextDate);
+        switch (t.periodUnit) {
+            case "day":
+                new_date.setDate(new_date.getDate() + t.period);
+                break;
+            case "week":
+                new_date.setDate(new_date.getDate() + t.period * 7);
+                break;
+            case "month":
+                new_date.setMonth(new_date.getMonth() + t.period);
+                break;
+        }
+        t.nextDate = new_date;
+        t.save();
     }
 }
 
