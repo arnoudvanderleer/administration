@@ -15,7 +15,7 @@ html {
 
 body {
     display: grid;
-    grid-template-columns: 250px 1fr;
+    grid-template-columns: 270px 1fr;
     width: 100vw;
     height: 100vh;
     margin: 0px;
@@ -35,7 +35,7 @@ header {
     color: black;
     font-size: 5em;
     background-color: var(--heading-fg-color);
-    width: calc(100vw - 250px);
+    width: calc(100vw - 270px);
     height: 100vh;
     position: fixed;
     opacity: .7;
@@ -83,7 +83,7 @@ button, button.material-symbols-outlined {
     cursor: pointer;
 }
 
-input, .selectize-input, .selectize-dropdown, .selectize-input.full {
+input, select, .selectize-input, .selectize-dropdown, .selectize-input.full {
     box-shadow: none;
     border: none;
     font-size: 14px;
@@ -94,14 +94,22 @@ input, .selectize-input, .selectize-dropdown, .selectize-input.full {
     font-family: inherit;
 }
 
-input, .selectize-input, .selectize-input.full, [contenteditable="plaintext-only"] {
+input:not([type="checkbox"]), select, .selectize-input, .selectize-input.full, [contenteditable="plaintext-only"] {
     padding: 0px 10px;
     background-color: var(--main-input-color);
+    border-radius: 3px;
+    height: 20px;
 }
 
 input:disabled, .selectize-control .selectize-input.disabled {
     background: var(--main-disabled-color);
     opacity: 1;
+}
+
+span.financial-period-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .balance-body {
@@ -138,5 +146,5 @@ input:disabled, .selectize-control .selectize-input.disabled {
 }
 
 .transaction .description {
-    padding: 2.5px;
+    padding: 2px;
 }

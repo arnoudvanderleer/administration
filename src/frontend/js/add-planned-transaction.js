@@ -1,11 +1,16 @@
-import Transaction from "./common/Transaction.js";
-import { Transaction as TransactionModel } from "./common/api.js";
+import PlannedTransaction from "./common/PlannedTransaction.js";
+import { PlannedTransaction as PlannedTransactionModel } from "./common/api.js";
 
 (async () => {
-    let transaction = new Transaction({
-        date: new Date().toISOString().substring(0, 10),
+    let date = new Date();
+    date.setDate(date.getDate() + 1);
+
+    let transaction = new PlannedTransaction({
+        nextDate: date.toISOString().substring(0, 10),
+        period: 1,
+        periodUnit: "month",
         description: "Omschrijving",
-        Mutations: [],
+        PlannedMutations: [],
     }, true);
 
     $(".transactions").append(transaction.dom);
@@ -21,11 +26,12 @@ import { Transaction as TransactionModel } from "./common/api.js";
                 AccountId: row.account.id,
             }))).reduce((a, b) => a.concat(b), []);
 
-            await TransactionModel.add({
-                Mutations: mutations,
-                date: $(transaction.dom).find(".date").val(),
+            await PlannedTransactionModel.add({
+                PlannedMutations: mutations,
                 description: $(transaction.dom).find(".description").text(),
-                complete: true,
+                nextDate: $(transaction.dom).find(".date").val(),
+                period: $(transaction.dom).find(".period").val(),
+                periodUnit: $(transaction.dom).find(".period-unit").val(),
             });
             transaction.editable = false;
             save_button.remove();
