@@ -40,8 +40,8 @@ const schemas : {[key: string]: Schema} = {
             isArray: true,
             isEmpty: false
         },
-        'Mutations.*.AccountId': {isInt: true},
-        'Mutations.*.amount': {isDecimal: true},
+        'PlannedMutations.*.AccountId': {isInt: true},
+        'PlannedMutations.*.amount': {isDecimal: true},
     },
     financial_period: {
         start_date: {isDate: true},
