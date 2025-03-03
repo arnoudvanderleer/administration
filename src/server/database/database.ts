@@ -26,6 +26,7 @@ export default (async () => {
     const sequelize = new Sequelize(credentials.database, credentials.username, credentials.password, {
         host: credentials.host,
         dialect: 'postgres',
+        logging: false,
     });
 
     console.log('Connecting to database');
