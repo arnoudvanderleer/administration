@@ -94,7 +94,7 @@ input, select, .selectize-input, .selectize-dropdown, .selectize-input.full {
     font-family: inherit;
 }
 
-input, select, .selectize-input, .selectize-input.full, [contenteditable="plaintext-only"] {
+input:not([type="checkbox"]), select, .selectize-input, .selectize-input.full, [contenteditable="plaintext-only"] {
     padding: 0px 10px;
     background-color: var(--main-input-color);
     border-radius: 3px;
