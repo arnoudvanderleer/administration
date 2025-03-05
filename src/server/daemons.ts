@@ -1,10 +1,9 @@
-import { Op, Transaction } from 'sequelize';
+import { Op } from 'sequelize';
 import connect_db from './database/database';
 import PlannedMutation from './database/PlannedMutation';
 import PlannedTransaction from 'database/PlannedTransaction';
-import Account from './database/Account';
 
-async function process_planned_transactions () {
+export async function process_planned_transactions () {
     console.log("Process planned transactions");
     const models = await connect_db;
 
@@ -26,45 +25,45 @@ async function process_planned_transactions () {
     }) as (PlannedTransaction & {PlannedMutations: PlannedMutation[]})[]);
 
     for (let t of transactions) {
-        if (t.nextDate < financial_period.start_date || financial_period.end_date < t.nextDate) {
-            continue;
-        }
-
-        console.log("Processing planned transaction", t.get({plain: true}));
-        let new_transaction = await models.Transaction.create({
-            description: t.description,
-            date: t.nextDate,
-            complete: true,
-        });
-
-        await Promise.all(t.PlannedMutations.map(m => 
-            new_transaction.createMutation({
-                amount: m.amount,
-                AccountId: m.AccountId,
-            })
-        ));
-
-        console.log("Create transaction", new_transaction.get({plain: true}));
-
-        if (t.period <= 0) {
-            await t.destroy();
-            continue;
-        }
-
-        let new_date = new Date(t.nextDate);
-        switch (t.periodUnit) {
-            case "day":
-                new_date.setDate(new_date.getDate() + t.period);
+        while (t.nextDate <= new Date()) {
+            if (t.nextDate < financial_period.start_date || financial_period.end_date < t.nextDate) {
                 break;
-            case "week":
-                new_date.setDate(new_date.getDate() + t.period * 7);
+            }
+
+            console.log("Processing planned transaction", t.get({plain: true}));
+            let new_transaction = await models.Transaction.create({
+                description: t.description,
+                date: t.nextDate,
+                complete: true,
+            });
+
+            await Promise.all(t.PlannedMutations.map(m => 
+                new_transaction.createMutation({
+                    amount: m.amount,
+                    AccountId: m.AccountId,
+                })
+            ));
+
+            if (t.period <= 0) {
+                await t.destroy();
                 break;
-            case "month":
-                new_date.setMonth(new_date.getMonth() + t.period);
-                break;
+            }
+
+            let new_date = new Date(t.nextDate);
+            switch (t.periodUnit) {
+                case "day":
+                    new_date.setDate(new_date.getDate() + t.period);
+                    break;
+                case "week":
+                    new_date.setDate(new_date.getDate() + t.period * 7);
+                    break;
+                case "month":
+                    new_date.setMonth(new_date.getMonth() + t.period);
+                    break;
+            }
+            t.nextDate = new_date;
+            t.save();
         }
-        t.nextDate = new_date;
-        t.save();
     }
 }
 

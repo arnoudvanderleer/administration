@@ -8,6 +8,7 @@ import PlannedMutation from '../database/PlannedMutation';
 
 import { Transaction, Op, FindOptions, IncludeOptions, col } from 'sequelize';
 import * as util from '../util';
+import { process_planned_transactions } from '../daemons';
 
 const router = express.Router();
 
@@ -410,6 +411,8 @@ export default (async () => {
                 }
             }
 
+            await process_planned_transactions();
+
             res.send(await models.PlannedTransaction.findOne({
                 include: {
                     model: PlannedMutation,
@@ -453,7 +456,9 @@ export default (async () => {
                 }
             }
 
-            transaction.save();
+            await transaction.save();
+
+            await process_planned_transactions();
 
             res.send(transaction);
         }
