@@ -8,7 +8,7 @@ export default class Balance {
      *      edit_enabled: boolean,
      *      rows: {
      *          account: {
-     *              is_bank: boolean
+     *              iban: ?string
      *          } & ({name: string, number: int} | {id: int}),
      *          amount: int,
      *      }[]
@@ -67,7 +67,7 @@ export default class Balance {
 
             for (let j = this.invalid_rows[i].length; j < target_row_count; j++) {
                 let amount = this.rows[i].length == 0 ? totals[1 - i] : 0;
-                this.add_row({ account: { id: 0, is_bank: false }, amount }, i);
+                this.add_row({ account: { id: 0, iban: null }, amount }, i);
             }
             for (let j = this.invalid_rows[i].length; j > target_row_count; j--) {
                 this.remove_row(this.invalid_rows[i][j - 1], i);
@@ -143,7 +143,7 @@ export class BalanceRow extends EventTarget {
                 .click(function () { setTimeout(() => $(this).select(), 0) })
                 .change(() => this.update())
                 .prop("disabled", !this.edit_enabled);
-            get_account_select(this.account.is_bank).then(a => 
+            get_account_select(this.account.iban).then(a => 
                 a.replaceAll(this.dom.find(".label"))
                 .addClass("label")
                 .prop("disabled", !this.edit_enabled)

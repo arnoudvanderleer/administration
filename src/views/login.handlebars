@@ -124,7 +124,7 @@
                             <th>Naam</th>
                             <th style="width: 20%;">Nummer</th>
                             <th style="width: 20%;">Beginwaarde</th>
-                            <th>Bank</th>
+                            <th>IBAN</th>
                             <th></th>
                         </tr></thead>
                         <tbody class="accounts-body"></tbody>
@@ -141,7 +141,7 @@
             <td><input type="text" name="account_name" required /></td>
             <td><input type="number" min="1000" max="4999" name="account_number" required /></td>
             <td><input type="number" step="0.01" name="account_value" required /></td>
-            <td><input type="hidden" name="checkbox_id" /><input type="checkbox" name="account_is_bank" /></td>
+            <td><input type="text" name="account_iban" /></td>
             <td><button class="remove-line">x</button></td>
         </tr>
     </template>
@@ -156,7 +156,6 @@
 
         let table_body = document.querySelector(".accounts-body");
         let template = document.querySelector(".account-row").content.firstElementChild;
-        let checkbox_id = 1;
 
         function add_account() {
             let node = template.cloneNode(true);
@@ -164,9 +163,6 @@
             node.querySelector(".remove-line").addEventListener("click", e => {
                 table_body.removeChild(node);
             });
-            node.querySelector(`[name="account_is_bank"]`).name = `account_is_bank[${checkbox_id}]`;
-            node.querySelector(`[name="checkbox_id"]`).value = checkbox_id;
-            checkbox_id++;
         }
 
         document.querySelector(".add-account").addEventListener("click", e => {

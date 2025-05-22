@@ -8,13 +8,13 @@ export const get_account_select = (() => {
             $("<option></option>")
                 .text(`${a.number}: ${a.name}`)
                 .attr("value", a.id)
-                .appendTo(a.is_bank ? bank_accounts_select_template : non_bank_accounts_select_template)
+                .appendTo(a.iban ? bank_accounts_select_template : non_bank_accounts_select_template)
         );
         resolve();
     });
-    return async is_bank => {
+    return async iban => {
         await selects_promise;
-        return clone_template(`template.${is_bank ? "" : "non-"}bank-accounts`);
+        return clone_template(`template.${iban ? "" : "non-"}bank-accounts`);
     }
 })();
 
@@ -31,6 +31,10 @@ export function render(value, abs) {
 
 export function render_date(date) {
     return new Date(date).toDateString().substring(4);
+}
+
+export function render_iban(iban) {
+    return iban ? iban.replace(/(.{4})/g, "$1 ").trim() : "";
 }
 
 export function get_factor(number) {

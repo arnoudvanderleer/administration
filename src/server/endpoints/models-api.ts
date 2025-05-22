@@ -16,6 +16,7 @@ const schemas : {[key: string]: Schema} = {
     account: {
         name: {exists: {options: {values: 'falsy'}}},
         number: {isInt: true},
+        iban: {exists: true},
         AccountFinancialPeriods: {
             isArray: true,
         },
@@ -91,6 +92,7 @@ export default (async () => {
             let account = await models.Account.create({
                 number: validated_data.number,
                 name: validated_data.name,
+                iban: util.sanitize_iban(validated_data.iban),
             });
 
             let period = await models.AccountFinancialPeriod.create({
@@ -127,6 +129,7 @@ export default (async () => {
 
             account.number = validated_data.number;
             account.name = validated_data.name;
+            account.iban = util.sanitize_iban(validated_data.iban);
 
             let existing_periods = await account.getAccountFinancialPeriods({
                 where: { FinancialPeriodId: req.session.financial_period?.id },

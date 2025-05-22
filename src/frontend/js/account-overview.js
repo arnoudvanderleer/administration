@@ -148,7 +148,7 @@ async function fetch_accounts() {
             factor,
             start_amount,
             end_amount,
-            is_bank : account.is_bank,
+            iban : account.iban,
             name: account.name,
             budget: factor * account.budget,
         };
@@ -161,7 +161,7 @@ async function fetch_accounts() {
         factor: get_factor(4000),
         start_amount: equity_start,
         end_amount: equity_end,
-        is_bank : false,
+        iban : null,
         name: 'Eigen Vermogen',
         budget: 0,
     };

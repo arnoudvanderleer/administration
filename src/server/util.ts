@@ -3,6 +3,9 @@ import { Request } from "express";
 export const sanitize_date = (date : any) => 
     new Date(date ?? 0).getTime();
 
+export const sanitize_iban = (iban : any) =>
+    iban ? iban.toString().replace(/[^0-9A-Za-z]/g, "").toUpperCase() : null;
+
 export const period_start = (req : Request) => 
     sanitize_date(req.session.financial_period?.start_date);
 

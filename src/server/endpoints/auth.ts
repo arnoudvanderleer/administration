@@ -5,6 +5,7 @@ import tmp from 'tmp-promise';
 import fs from 'fs';
 
 import crypto from 'crypto';
+import { sanitize_iban } from '../util';
 
 const router = express.Router();
 
@@ -67,7 +68,7 @@ export default (async () => {
             let account_data = (req.body.account_name as string[]).map((n, i) => ({
                 name: req.body.account_name[i],
                 number: req.body.account_number[i],
-                is_bank: req.body[`account_is_bank[${req.body.checkbox_id[i]}]`] == 'on',
+                iban: sanitize_iban(req.body.account_iban[i]),
                 value: ([1, 4].indexOf(Math.floor(req.body.account_number[i] / 1000)) > -1 ? (-1) : 1) * req.body.account_value[i],
             }));
 

@@ -6,6 +6,7 @@ export default class Account extends Model {
     declare id: number; // An auto increment primary key
     declare number: number; // The account number as shown to the user
     declare name: string;
+    declare iban: string;
 
     declare getAccountFinancialPeriods: HasManyGetAssociationsMixin<AccountFinancialPeriod>;
     declare countAccountFinancialPeriods: HasManyCountAssociationsMixin;
@@ -29,7 +30,7 @@ export default class Account extends Model {
     declare removeMutations: HasManyRemoveAssociationsMixin<Mutation, number>;
     declare createMutation: HasManyCreateAssociationMixin<Mutation>;
 
-    static overview(period_id: number, date: string) : Promise<{id: number, number: number, name: string, is_bank: boolean, budget: string, amount: string}[]> | undefined {
+    static overview(period_id: number, date: string) : Promise<{id: number, number: number, name: string, iban: string, budget: string, amount: string}[]> | undefined {
         let query =
             `WITH mutation_data AS (
                 SELECT
@@ -48,7 +49,7 @@ export default class Account extends Model {
                 A.id,
                 A.number,
                 A.name,
-                A.is_bank,
+                A.iban,
                 AFP.budget,
                 AFP.start_amount + SUM(COALESCE(M.amount, 0)) AS amount
             FROM
@@ -88,6 +89,6 @@ export function init(sequelize: Sequelize) {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        is_bank: DataTypes.BOOLEAN,
+        iban: DataTypes.STRING,
     }, {sequelize});
 }

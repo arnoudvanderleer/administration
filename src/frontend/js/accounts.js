@@ -1,4 +1,4 @@
-import { clone_template, render, get_factor } from "./common/common.js";
+import { clone_template, render, render_iban, get_factor } from "./common/common.js";
 import { Account } from "./common/api.js";
 
 load();
@@ -9,6 +9,7 @@ let save_new = async () => {
     let data = {
         number,
         name : row.find(".name").val(),
+        iban : row.find(".iban").val(),
         AccountFinancialPeriods: [{
             FinancialPeriodId: current_financial_period,
             start_amount: get_factor(number) * parseFloat(row.find(".start-amount").val()),
@@ -32,6 +33,7 @@ function add_row(account, place) {
     row.find(".enabled").prop("checked", account.AccountFinancialPeriods.length > 0);
     row.find(".number").text(account.number);
     row.find(".name").text(account.name);
+    row.find(".iban").text(render_iban(account.iban));
     row.find(".start-amount").text(account.AccountFinancialPeriods.length > 0 ? render(get_factor(account.number) * account.AccountFinancialPeriods[0].start_amount) : "");
     row.find(".budget").text(account.AccountFinancialPeriods.length > 0 ? render(get_factor(account.number) * account.AccountFinancialPeriods[0].budget) : "");
     row.find(".edit").click(() => edit_row(account.id, row));
@@ -49,7 +51,7 @@ function add_row(account, place) {
 
 function edit_row(id, row) {
     let form_row = clone_template(".edit-row");
-    for (let field of [".number", ".name", ".start-amount", ".budget"]) {
+    for (let field of [".number", ".name", ".iban", ".start-amount", ".budget"]) {
         form_row.find(field).val(row.find(field).text());
     }
     form_row.find(".enabled").prop("checked", row.find(".enabled").is(":checked"));
@@ -59,6 +61,7 @@ function edit_row(id, row) {
         let data = {
             number,
             name : form_row.find(".name").val(),
+            iban : form_row.find(".iban").val(),
             AccountFinancialPeriods: form_row.find(".enabled").is(":checked") ? [{
                 FinancialPeriodId: current_financial_period,
                 start_amount: get_factor(number) * parseFloat(form_row.find(".start-amount").val()) || 0,

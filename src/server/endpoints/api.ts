@@ -202,7 +202,7 @@ export default (async () => {
             return res.send("The accounts could not be fetched");
         }
 
-        let bank_account_transactions = await Promise.all(accounts.filter(a => a.is_bank).map(a =>
+        let bank_account_transactions = await Promise.all(accounts.filter(a => a.iban).map(a =>
             models.Transaction.unprocessed(a.id).then(u => ({
                 number: a.number,
                 name: a.name,

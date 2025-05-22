@@ -9,7 +9,7 @@ export default class AccountOverview extends Balance {
      *      edit_enabled: boolean,
      *      rows: {
      *          account: {
-     *              is_bank: boolean
+     *              iban: ?string
      *          } & ({name: string, number: int} | {id: int}),
      *          amount: int,
      *          budget: int,
