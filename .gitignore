@@ -4,3 +4,4 @@
 /docker-compose.yml
 /src/node_modules
 /src/migrations/config.json
+.vscode

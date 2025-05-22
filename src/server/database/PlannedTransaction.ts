@@ -24,7 +24,7 @@ export default class PlannedTransaction extends Model {
 
 export function init(sequelize: Sequelize) {
     PlannedTransaction.init({
-        description: DataTypes.STRING,
+        description: DataTypes.TEXT,
         nextDate: DataTypes.DATE,
         period: DataTypes.INTEGER,
         periodUnit: DataTypes.ENUM('day', 'week', 'month'),

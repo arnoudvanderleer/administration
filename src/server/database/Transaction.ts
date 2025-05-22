@@ -49,7 +49,7 @@ export function init(sequelize: Sequelize) {
             autoIncrement: true,
             primaryKey: true,
         },
-        description: DataTypes.STRING,
+        description: DataTypes.TEXT,
         date: {
             type: DataTypes.DATE,
             allowNull: false,
