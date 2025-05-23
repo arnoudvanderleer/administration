@@ -7,7 +7,7 @@
 </style>
 
 <form method="POST" action="api/upload-transactions" enctype="multipart/form-data">
-    <input type="file" name="transactions" /><br />
+    <input type="file" name="transactions" accept="application/zip, text/csv" required /><br />
     <div class="account"></div>
     <input type="submit" value="Opsturen" /><br />
 </form>
