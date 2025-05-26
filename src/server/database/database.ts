@@ -22,7 +22,7 @@ const credentials = {
     port: 5432,
 };
 
-export default (async () => {
+const connect = (async () => {
     const sequelize = new Sequelize(credentials.database, credentials.username, credentials.password, {
         host: credentials.host,
         dialect: 'postgres',
@@ -82,7 +82,7 @@ export default (async () => {
     });
     PlannedMutation.belongsTo(PlannedTransaction);
 
-    sequelize.sync();
+    await sequelize.sync();
 
     return {
         sequelize,
@@ -98,10 +98,18 @@ export default (async () => {
     };
 })();
 
-const pg_flags = [
+export default connect;
+
+const connection_pg_flags = 
+    [
         ['username', credentials.username],
         ['host', credentials.host],
         ['port', credentials.port],
+    ]
+    .map(([name, value]) => `--${name}="${value}"`)
+    .join(" ");
+
+const pg_flags = connection_pg_flags + " " + [
         ['format', 't'],
     ]
     .map(([name, value]) => `--${name}="${value}"`)
@@ -118,7 +126,13 @@ export async function dump() {
 }
 
 export async function restore(name: string) {
-    let command = `gunzip -c "${name}" | PGPASSWORD="${credentials.password}" pg_restore ${pg_flags} --clean --dbname "${credentials.database}"`;
+    let { sequelize } = await connect;
+
+    await sequelize.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+
+    // await exec_promise(`PGPASSWORD="${credentials.password}" dropdb ${connection_pg_flags} "${credentials.database}"`);
+
+    let command = `gunzip -c "${name}" | PGPASSWORD="${credentials.password}" pg_restore ${pg_flags} --clean --if-exists --dbname "${credentials.database}"`;
 
     return exec_promise(command);
 }

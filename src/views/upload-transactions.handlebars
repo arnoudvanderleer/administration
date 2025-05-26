@@ -4,12 +4,22 @@
     main {
         background-color: var(--main-bg-color);
     }
+
+    input, select, .selectize-input, .selectize-input.full {
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    form {
+        max-width: 700px;
+        margin: auto;
+    }
 </style>
 
 <form method="POST" action="api/upload-transactions" enctype="multipart/form-data">
     <input type="file" name="transactions" accept="application/zip, text/csv" required /><br />
     <div class="account"></div>
-    <input type="submit" value="Opsturen" /><br />
+    <input type="submit" value="Uploaden" /><br />
 </form>
 
 {{#section 'scripts'}}

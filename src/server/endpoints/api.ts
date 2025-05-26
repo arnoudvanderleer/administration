@@ -1,91 +1,119 @@
 import express from 'express';
 import { parse } from 'csv-parse';
 import fs from 'fs/promises';
+import yauzl from 'yauzl-promise';
 
+import { Op, QueryTypes } from 'sequelize';
 import connect_db, { dump } from '../database/database';
 import BankTransaction from '../database/BankTransaction';
-import Mutation from '../database/Mutation';
+import FinancialPeriod from '../database/FinancialPeriod';
 import Account from '../database/Account';
-import { Op, QueryTypes } from 'sequelize';
-import FinancialPeriod from 'database/FinancialPeriod';
 import * as util from '../util';
-import AccountFinancialPeriod from 'database/AccountFinancialPeriod';
+import { buffer } from 'stream/consumers';
 
 const router = express.Router();
 
 export default (async () => {
     const models = await connect_db;
 
+    async function upload_transaction (line: Object[], account: Account, financial_period: FinancialPeriod) : Promise<{ added?: boolean, skipped?: boolean, error?: string }> {
+        let bank_transaction_id = `${line[1]} ${line[0]} ${line[15]}`;
+
+        let existing_bank_transaction = await BankTransaction.findOne({ where: { bank_transaction_id } });
+        if (existing_bank_transaction) {
+            return { skipped: true };
+        }
+
+        let date_string = line[0] as string;
+        let date = new Date(`${date_string.substring(6, 10)}-${date_string.substring(3, 5)}-${date_string.substring(0, 2)}`);
+
+        if (date < new Date(financial_period.start_date) || date > new Date(financial_period.end_date)) {
+            return { error: `Kan de regel ${JSON.stringify(line)} niet toevoegen omdat ${date} buiten het boekjaar ligt` };
+        }
+
+        let transaction = await models.Transaction.create({
+            date,
+            description: `${line[16]} ${line[17]}`.trim(),
+        });
+        let amount = parseFloat(line[10] as string);
+        await transaction.createBankTransaction({
+            bank_transaction_id,
+            this_account: line[1],
+            other_account: line[2],
+            other_account_name: line[3],
+            is_credit: amount > 0,
+        });
+        let mutation = await transaction.createMutation({
+            amount: amount.toFixed(2),
+        });
+        account.addMutation(mutation);
+
+        return { added : true };
+    }
+
     router.post("/upload-transactions", async (req, res) => {
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).send('No files were uploaded.');
         }
 
-        if (!req.body || !req.body.account) {
-            return res.status(400).send('No account was given.');
+        let uploaded_file = req.files.transactions;
+
+        if (Array.isArray(uploaded_file)) {
+            return res.status(400).send(`Please upload a single zip or csv file.`);
         }
 
-        let account = await models.Account.findByPk(req.body.account);
+        let files: {data: Buffer, name: string, account: Account}[] = [];
 
-        if (account == null) {
-            return res.status(400).send('The account does not exist!');
-        }
-
-        let file = req.files.transactions;
-
-        let lines: Object[][] = [];
-        if (Array.isArray(file)) {
-            lines.concat(...await Promise.all(file.map(f => parse_csv(f.data))));
-        } else {
-            lines = await parse_csv(file.data);
-        }
-
-        let results: { added: number, skipped: number, errors: string[] } = {
-            added: 0,
-            skipped: 0,
-            errors: [],
-        };
-        for (let line of lines) {
-            let bank_transaction_id = `${line[1]} ${line[0]} ${line[15]}`;
-
-            let existing_bank_transaction = await BankTransaction.findOne({ where: { bank_transaction_id } });
-            if (existing_bank_transaction) {
-                results.skipped++;
-                continue;
+        if (uploaded_file.mimetype == 'text/csv') {
+            if (!req.body || !req.body.account) {
+                return res.status(400).send('No account was given.');
             }
 
-            let date_string = line[0] as string;
-            let date = new Date(`${date_string.substring(6, 10)}-${date_string.substring(3, 5)}-${date_string.substring(0, 2)}`);
+            let account = await models.Account.findByPk(req.body.account);
 
-            if (
-                date < new Date((req.session.financial_period as FinancialPeriod).start_date) ||
-                date > new Date((req.session.financial_period as FinancialPeriod).end_date)
-            ) {
-                results.errors.push(`Kan de regel ${JSON.stringify(line)} niet toevoegen omdat ${date} buiten het boekjaar ligt`);
-                continue;
+            if (account == null) {
+                return res.status(400).send('The account does not exist!');
             }
 
-            let transaction = await models.Transaction.create({
-                date,
-                description: `${line[16]} ${line[17]}`.trim(),
+            files.push({
+                data: uploaded_file.data,
+                name: uploaded_file.name,
+                account: account,
             });
-            let amount = parseFloat(line[10] as string);
-            await transaction.createBankTransaction({
-                bank_transaction_id,
-                this_account: line[1],
-                other_account: line[2],
-                other_account_name: line[3],
-                is_credit: amount > 0,
-            });
-            let mutation = await transaction.createMutation({
-                amount: amount.toFixed(2),
-            });
-            account.addMutation(mutation);
-
-            results.added++;
+        } else if (uploaded_file.mimetype == 'application/zip') {
+            const bank_accounts = Account.findAll({ where: { iban: { [Op.ne]: null } } });
+            const zip = await yauzl.fromBuffer(uploaded_file.data);
+            try {
+              for await (const entry of zip) {
+                if (!entry.filename.endsWith('/')) {
+                    let account = match_filename_iban(entry.filename, await bank_accounts);
+                    if (account == null) {
+                        console.log(`No account found for file ${entry.filename}`);
+                        continue;
+                    }
+                    files.push({
+                        data: await buffer(await entry.openReadStream()),
+                        account,
+                        name: entry.filename,
+                    });
+                }
+              }
+            } finally {
+              await zip.close();
+            }
         }
 
-        console.log(results);
+        for (let file of files) {
+            let results = await Promise.all((await parse_csv(file.data)).map(line =>
+                upload_transaction(line, file.account, req.session.financial_period as FinancialPeriod)
+            ));
+
+            console.log({
+                added: results.filter(r => r.added).length,
+                skipped: results.filter(r => r.skipped).length,
+                errors: results.filter(r => r.error),
+            }, file.name, file.account.name);
+        }
 
         return res.writeHead(302, {
             'Location': '/process-transactions',
@@ -295,4 +323,23 @@ function parse_csv(data: Buffer): Promise<Object[][]> {
         parser.write(data.toString());
         parser.end();
     });
+}
+
+function match_filename_iban(filename: string, accounts: Account[]): Account | null {
+    const filter_functions : ((name: string, iban: string) => boolean)[] = [
+        (name, iban) => name.startsWith(iban),
+        (name, iban) => name.endsWith(iban),
+        (name, iban) => name.indexOf(iban) > -1,
+    ];
+
+    let sanitized_name = filename.replace(/(\.[^.]*| )/g, "").toUpperCase();
+
+    for (let f of filter_functions) {
+        let selected_accounts = accounts.filter(a => f(sanitized_name, a.iban));
+        if (selected_accounts.length == 1) {
+            return selected_accounts[0];
+        }
+    }
+
+    return null;
 }
