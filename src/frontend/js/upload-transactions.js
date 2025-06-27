@@ -24,7 +24,7 @@ const account_promise = Account.get_all();
 
         account_input.next("div").toggle(file.type != "application/zip");
 
-        if (file.type != "text/csv") {
+        if (["text/csv", "application/vnd.ms-excel"].indexOf(file.type) == -1) {
             return;
         }
 

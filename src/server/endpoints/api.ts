@@ -64,7 +64,7 @@ export default (async () => {
 
         let files: {data: Buffer, name: string, account: Account}[] = [];
 
-        if (uploaded_file.mimetype == 'text/csv') {
+        if (["text/csv", "application/vnd.ms-excel"].indexOf(uploaded_file.mimetype) != -1) {
             if (!req.body || !req.body.account) {
                 return res.status(400).send('No account was given.');
             }
