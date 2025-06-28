@@ -80,7 +80,7 @@ export default (async () => {
                 name: uploaded_file.name,
                 account: account,
             });
-        } else if (uploaded_file.mimetype == 'application/zip') {
+        } else if (["application/zip", "application/x-zip-compressed"].indexOf(uploaded_file.mimetype) != -1) {
             const bank_accounts = Account.findAll({ where: { iban: { [Op.ne]: null } } });
             const zip = await yauzl.fromBuffer(uploaded_file.data);
             try {

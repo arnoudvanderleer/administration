@@ -22,7 +22,7 @@ const account_promise = Account.get_all();
 
         let account_input = $('select[name="account"]');
 
-        account_input.next("div").toggle(file.type != "application/zip");
+        account_input.next("div").toggle(["application/zip", "application/x-zip-compressed"].indexOf(file.type) == -1);
 
         if (["text/csv", "application/vnd.ms-excel"].indexOf(file.type) == -1) {
             return;
